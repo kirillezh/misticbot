@@ -3,12 +3,24 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
 
 import datetime, random
 from filtermat import check
 from time import sleep
 
 from example import DRIVER, FUCK_YOU, GMT, URL_TREVOG, OFFMAT, end, NOBOT
+
+#check nomer in text
+
+def to_sym(mes):
+    s = []
+    for t in mes.split():
+        try:
+            s.append(float(t))
+        except ValueError:
+            pass
+    return s
 
 
 #check mat in message    
@@ -47,7 +59,7 @@ def screenshot():
     driver.set_window_size(1680, 1200)
     driver.get(URL_TREVOG) 
     
-    sleep(3)
+    sleep(5)
     time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
     
     if(time_h>=22 or time_h<=8):
@@ -65,7 +77,6 @@ def screenshot():
     driver.quit()
     return 'screenshot.png'
 
-
 #search url from text
 def text_to_url(text):
     split_text = text.split()
@@ -76,6 +87,7 @@ def text_to_url(text):
         return link
     except:
         return ''
+
 
 #search video from url
 def url_to_video(url):
@@ -90,7 +102,7 @@ def url_to_video(url):
     video = dict()
     sleep(2)
     try:
-        video['url'] = driver.find_element(by=By.XPATH, value='/html/body/div[2]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/video').get_attribute('src')
+        video['url'] = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[2]/div/div/div/video').get_attribute('src'))
     except:
         video['url'] = ''
     driver.quit()
