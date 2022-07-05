@@ -14,9 +14,9 @@ from array import *
 from typing import Optional
 from datetime import tzinfo
 
-from example import API_ID, API_HASH, CHAT_ID, NOBOT, API_TOKEN, sticker_id_pox, poebat, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, channel_name, name, otboi, testing_inform, master_xuilo, end, help
+from example import API_ID, API_HASH, CHAT_ID, NOBOT, API_TOKEN, sticker_id_pox, poebat_, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, channel_name, name, otboi, testing_inform, master_xuilo, end, help
 
-from function import check_mat, checker_tiktok, screenshot
+from function import check_mat, checker_tiktok, screenshot, to_sym
 
 #start telethon
 client = TelegramClient('progress',API_ID, API_HASH)
@@ -26,6 +26,18 @@ client.start()
 bot = Bot(token=API_TOKEN)
 logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
+
+#gdz
+@dp.message_handler(commands=['gdz'])
+async def gdz(message: types.Message):   
+    text = to_sym(message.text)
+    if len(text) != 0:
+        try:
+            nomer = int(text[0])
+            await bot.send_photo(chat_id=message.chat.id, photo="https://vshkole.com.ua/images/gdz/9-klas/ukrainska-mova/glazova/"+str(nomer)+".jpg", caption=end, parse_mode="HTML", reply_to_message_id=message.message_id)
+        except:
+            await message.reply("Не знайдено у гдз:("+end,parse_mode="HTML", disable_web_page_preview=True)
+
 
 #TREVOGA
 @client.on(events.NewMessage(chats=(channel_name)))
@@ -50,22 +62,28 @@ async def pox(message: types.Message):
     mes = random.sample(sticker_id_pox, k=1)[0]
     try:
         if(message.reply_to_message.from_user.id!=NOBOT):
-            await message.reply_to_message.answer_sticker(mes, reply=message.reply_to_message)
+            if(random.randint(1,5)==1):
+                await bot.send_voice(chat_id=message.chat.id, voice=open('1.ogg', 'rb'),  caption=end, parse_mode="HTML")                
+            else:
+                await message.reply_to_message.answer_sticker(mes, reply=message.reply_to_message)
         else:
             await message.answer("Ты кринж "+end, parse_mode="HTML", disable_web_page_preview=True)
     except:
-        await message.answer_sticker(mes)
+        if(random.randint(1,5)==1):
+                await bot.send_voice(chat_id=message.chat.id, voice=open('1.ogg', 'rb'),  caption=end, parse_mode="HTML")                
+        else:
+            await message.answer_sticker(mes)
 
 #Поебать
 @dp.message_handler(commands=['poebat'])
 async def poebat(message: types.Message):   
     try:
         if(message.reply_to_message.from_user.id!=NOBOT):
-            await message.reply_to_message.answer(poebat+end, reply=message.reply_to_message, parse_mode="HTML", disable_web_page_preview=True)
+            await message.reply_to_message.answer(poebat_+end, reply=message.reply_to_message, parse_mode="HTML", disable_web_page_preview=True)
         else:
             await message.answer("Ты кринж "+end, parse_mode="HTML", disable_web_page_preview=True)
     except:
-        await message.answer(poebat+end, parse_mode="HTML", disable_web_page_preview=True)
+        await message.answer(poebat_ + end, parse_mode="HTML", disable_web_page_preview=True)
 #Ливни
 @dp.message_handler(commands=['livni'])
 async def livni(message: types.Message):   
