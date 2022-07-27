@@ -39,6 +39,7 @@ async def check_mat(message):
 
 #checking and sending tiktok-video
 async def checker_tiktok(bot, message):
+    await bot.send_chat_action(message.chat.id, 'upload_video')
     url_light=text_to_url(message.text)
     if("tiktok.com/" in url_light):
         video_data=url_to_video(url_light)
