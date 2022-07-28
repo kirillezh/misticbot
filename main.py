@@ -43,7 +43,7 @@ async def gdz(message: types.Message):
 #TREVOGA
 @client.on(events.NewMessage(chats=(channel_name)))
 async def trevoga(message):
-    await bot.send_chat_action(message.chat.id, 'upload_photo')
+    await bot.send_chat_action(CHAT_ID, 'upload_photo')
     if(trevog_i in str(message.message)):
         photo = open(screenshot(), 'rb')
         await bot.send_photo(chat_id=CHAT_ID, photo=photo, caption=random.sample(master_xuilo, k=1)[0]+end, parse_mode="HTML")
@@ -54,7 +54,7 @@ async def trevoga(message):
 
 #Help
 @dp.message_handler(commands=['start'])
-async def start(message: types.Message):   
+async def start(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     await message.reply(help,parse_mode="HTML", disable_web_page_preview=True)
 
