@@ -157,6 +157,12 @@ async def new_members_handler(message: Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     new_member = message.new_chat_members[0]
     await bot.send_message(message.chat.id, f"Привет, {new_member.mention}. Ты бот!")
+    
+@dp.message_handler(content_types=[ContentType.LEFT_CHAT_MEMBER])
+async def new_members_handler(message: Message):
+    await bot.send_chat_action(message.chat.id, 'typing')
+    await bot.send_message(message.chat.id, "Эх... не выдержал токсичности группы и сбежал(")
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
