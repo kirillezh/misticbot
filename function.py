@@ -1,12 +1,10 @@
 #import selenium(chrome)
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 
 import datetime, random
-from filtermat import check
+from roughfilter import search_obscene_words
 from time import sleep
 
 from example import DRIVER, FUCK_YOU, GMT, URL_TREVOG, OFFMAT, end, NOBOT
@@ -28,10 +26,10 @@ async def check_mat(message):
     mes=str(message.text)
     mes=mes.lower()
     try:
-        ifcheck=check(str(message.text))
+        ifcheck=search_obscene_words(str(message.text))
     except:
         ifcheck = False
-    if(ifcheck and message.from_user.id!=NOBOT):
+    if(ifcheck and message.from_user.id != NOBOT):
             if('кирилл' in mes  or 'керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
                 await message.reply(FUCK_YOU+end,parse_mode="HTML", disable_web_page_preview=True)
             elif(random.randint(1, 10000)==1):
@@ -39,9 +37,10 @@ async def check_mat(message):
 
 #checking and sending tiktok-video
 async def checker_tiktok(bot, message):
-    await bot.send_chat_action(message.chat.id, 'upload_video')
+    
     url_light=text_to_url(message.text)
     if("tiktok.com/" in url_light):
+        await bot.send_chat_action(message.chat.id, 'upload_video')
         video_data=url_to_video(url_light)
         try:
             await bot.send_video(message.chat.id, video_data['url'], reply_to_message_id=message.message_id, caption=end,parse_mode="HTML")
@@ -53,29 +52,26 @@ def screenshot():
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')
-    chrome_options.add_argument("--kiosk")
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(DRIVER,options=chrome_options)
-
+    chrome_options.add_argument("--disable-setuid-sandbox")
+    driver = webdriver.Chrome(DRIVER, chrome_options=chrome_options)
     driver.set_window_size(1680, 1200)
     driver.get(URL_TREVOG) 
-    
-    sleep(5)
+
     time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
     
     if(time_h>=22 or time_h<=8):
         try:
-            driver.execute_script("arguments[0].setAttribute('class','dark menu-hidden')", driver.find_element(By.TAG_NAME, 'html'))
+            WebDriverWait(driver, timeout=10).until(lambda d: d.execute_script("arguments[0].setAttribute('class','dark menu-hidden')", driver.find_element(By.TAG_NAME, 'html')))
         except:
             pass
     else:
         try:
-            driver.execute_script("arguments[0].setAttribute('class','light menu-hidden')", driver.find_element(By.TAG_NAME, 'html'))
+            WebDriverWait(driver, timeout=10).until(lambda d: d.execute_script("arguments[0].setAttribute('class','light menu-hidden')", driver.find_element(By.TAG_NAME, 'html')))
         except:
             pass
-    sleep(1)
     driver.save_screenshot("screenshot.png")
     driver.quit()
+
     return 'screenshot.png'
 
 #search url from text
@@ -98,7 +94,6 @@ def url_to_video(url):
     chrome_options.add_argument("--kiosk")
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
-
     driver.get(url) 
     video = dict()
     sleep(2)
