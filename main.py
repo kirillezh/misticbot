@@ -1,5 +1,4 @@
 #import telethon
-from email import message
 from time import sleep
 from telethon import TelegramClient, events
 from telethon.tl.types import Message
@@ -7,14 +6,12 @@ from telethon.tl.types import Message
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types.input_media import *
-from aiogram.types import ContentType, Message, ChatActions
+from aiogram.types import ContentType, Message
 
 import logging, random
 from array import *
-from typing import Optional
-from datetime import tzinfo
 
-from example import API_ID, API_HASH, CHAT_ID, NOBOT, API_TOKEN, sticker_id_pox, poebat_, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, channel_name, name, otboi, testing_inform, master_xuilo, end, help
+from example import API_ID, API_HASH, CHAT_ID, NOBOT, API_TOKEN, sticker_id_pox, poebat_, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, channel_name, name, otboi, testing_inform, master_xuilo, end, help, exit_
 
 from function import check_mat, checker_tiktok, screenshot, to_sym
 
@@ -26,19 +23,6 @@ client.start()
 bot = Bot(token=API_TOKEN)
 logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
-
-#gdz
-@dp.message_handler(commands=['gdz'])
-async def gdz(message: types.Message):   
-    text = to_sym(message.text)
-    if len(text) != 0:
-        await bot.send_chat_action(message.chat.id, 'typing')
-        try:
-            nomer = int(text[0])
-            await bot.send_photo(chat_id=message.chat.id, photo="https://vshkole.com.ua/images/gdz/9-klas/ukrainska-mova/glazova/"+str(nomer)+".jpg", caption=end, parse_mode="HTML", reply_to_message_id=message.message_id)
-        except:
-            await message.reply("Не знайдено у гдз:("+end,parse_mode="HTML", disable_web_page_preview=True)
-
 
 #TREVOGA
 @client.on(events.NewMessage(chats=(channel_name)))
@@ -57,7 +41,6 @@ async def trevoga(message):
 async def start(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     await message.reply(help,parse_mode="HTML", disable_web_page_preview=True)
-
 
 #Похуй
 @dp.message_handler(commands=['poxui'])
@@ -125,6 +108,16 @@ async def reply(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     await message.reply("Сам хуесос!"+end, parse_mode="HTML", disable_web_page_preview=True)
 
+#Info
+@dp.message_handler(commands=['info'])
+async def info(message: types.Message):
+    with open("info.json", "r") as file:
+        lines =file.readlines()
+        text = ''
+        for line in lines:
+            text += line
+        await message.reply(text, disable_web_page_preview=True)
+
 #GIF
 @dp.message_handler(commands=['animal', 'gif'])
 async def gif(message: types.Message):
@@ -157,11 +150,12 @@ async def new_members_handler(message: Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     new_member = message.new_chat_members[0]
     await bot.send_message(message.chat.id, f"Привет, {new_member.mention}. Ты бот!")
-    
+
+
 @dp.message_handler(content_types=[ContentType.LEFT_CHAT_MEMBER])
 async def new_members_handler(message: Message):
     await bot.send_chat_action(message.chat.id, 'typing')
-    await bot.send_message(message.chat.id, "Эх... не выдержал токсичности группы и сбежал(")
+    await bot.send_message(message.chat.id, exit_)
 
 
 if __name__ == '__main__':
