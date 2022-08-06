@@ -7,7 +7,10 @@ import datetime, random
 from roughfilter import search_obscene_words
 from time import sleep
 
-from example import DRIVER, FUCK_YOU, GMT, URL_TREVOG, OFFMAT, end, NOBOT
+from example import DRIVER, CHAT_ID, FUCK_YOU, GMT, URL_TREVOG, OFFMAT, end, NOBOT
+
+
+from bd import DataBase
 
 #check nomer in text
 
@@ -19,6 +22,17 @@ def to_sym(mes):
         except ValueError:
             pass
     return s
+
+async def hw(bot):   
+    nowdate = datetime.datetime.now().strftime('%d.%m.%Y')
+    info = DataBase().find(nowdate)
+    for i in info:
+        DataBase().update(i[0])
+        if(i[2]==None):
+            await bot.send_message(CHAT_ID, f"Сегодня День Варенья у кого-то... \n{i[3]}, с Днём Рождения!)")
+        else:
+            await bot.send_message(CHAT_ID,f"Оу.... Сегодня День Рождения у кого-то... \n<a href='tg://user?id={i[2]}'>{i[3]}</a>, c Днём Рождения!", parse_mode="HTML")
+
 
 
 #check mat in message    

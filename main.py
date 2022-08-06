@@ -11,9 +11,9 @@ from aiogram.types import ContentType, Message
 import logging, random
 from array import *
 
-from example import API_ID, API_HASH, CHAT_ID, NOBOT, API_TOKEN, sticker_id_pox, poebat_, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, channel_name, name, otboi, testing_inform, master_xuilo, end, help, exit_
+from example import API_ID, API_HASH, CHAT_ID, NOBOT, CHANNEL, API_TOKEN, sticker_id_pox, poebat_, trevog_i, otboi_i, close_i, livni_i, suka, sticker_id, name, otboi, testing_inform, master_xuilo, end, help, exit_
 
-from function import check_mat, checker_tiktok, screenshot, to_sym
+from function import check_mat, checker_tiktok, screenshot, hw
 
 #start telethon
 client = TelegramClient('progress',API_ID, API_HASH)
@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
 
 #TREVOGA
-@client.on(events.NewMessage(chats=(channel_name)))
+@client.on(events.NewMessage(chats=(CHANNEL)))
 async def trevoga(message):
     await bot.send_chat_action(CHAT_ID, 'upload_photo')
     if(trevog_i in str(message.message)):
@@ -144,6 +144,7 @@ async def screen(message: types.Message):
 async def AMC(message: types.Message):    
     await check_mat(message)
     await checker_tiktok(bot, message)
+    await hw(bot)
 
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):
