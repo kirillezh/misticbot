@@ -229,7 +229,6 @@ async def AMC(message: types.Message):
     await Function().check_mat(message)
     await Function().checker_tiktok(bot, message)
     await Function().HappyBirthday(bot)
-    await Function().case_answwer(message)
 
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):

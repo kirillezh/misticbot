@@ -103,11 +103,3 @@ class Function:
             video['url'] = ''
         driver.quit()
         return video
-
-    async def case_answwer(self, message):
-        text = str(message.text)
-        split_text = text.lower().split()
-        for i in split_text:
-            l = localisation['answer'].get(i, None)
-            if(l != None):
-                await message.reply_sticker(l)
