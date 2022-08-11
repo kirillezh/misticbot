@@ -75,7 +75,7 @@ class Function:
         return 'screenshot.png'
 
     #search url from text
-    def text_to_url(text):
+    def text_to_url(self, text):
         split_text = text.split()
         for i in split_text:
             if "http" in i:
@@ -87,7 +87,7 @@ class Function:
 
 
     #search video from url
-    def url_to_video(url):
+    def url_to_video(self, url):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
@@ -103,3 +103,11 @@ class Function:
             video['url'] = ''
         driver.quit()
         return video
+
+    async def case_answwer(self, message):
+        text = str(message.text)
+        split_text = text.lower().split()
+        for i in split_text:
+            l = localisation['answer'].get(i, None)
+            if(l != None):
+                await message.reply_sticker(l)
