@@ -194,6 +194,16 @@ async def gif(message: types.Message):
     await message.answer_sticker(
         random.choices(localisation['sticker_animal'], k=1)[0], 
         reply=message.message_id)
+#CAT
+@dp.message_handler(commands=['cat', 'Cat'])
+async def gif(message: types.Message):
+    await bot.send_chat_action(
+        message.chat.id, 
+        'choose_sticker')
+    await message.answer_sticker(
+        random.choices(localisation['sticker_cat'], k=1)[0], 
+        reply=message.message_id)
+
 # Shut up
 @dp.message_handler(commands=['close', 'Закрыть тему'])
 async def close(message: types.Message):
@@ -239,7 +249,9 @@ async def new_members_handler(message: Message):
     new_member = message.new_chat_members[0]
     await bot.send_message(
         message.chat.id, 
-        f"{localisation['youbot1']}, {new_member.mention}. {localisation['youbot2']}!")
+        f"{localisation['youbot1']}, {new_member.mention}. {localisation['youbot2']}!",
+        parse_mode="HTML", 
+        disable_web_page_preview=True)
 
 
 @dp.message_handler(content_types=[ContentType.LEFT_CHAT_MEMBER])
@@ -247,8 +259,9 @@ async def new_members_handler(message: Message):
     await bot.send_chat_action(message.chat.id, 'typing')
     await bot.send_message(
         message.chat.id, 
-        f"{localisation['leave']}\n{localisation['end']}")
-
+        f"{localisation['leave']}\n{localisation['end']}",
+        parse_mode="HTML", 
+        disable_web_page_preview=True)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

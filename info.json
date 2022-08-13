@@ -9,9 +9,10 @@
         "poxui": "Выражаю абсолютное пофигистическое отношение",
         "poebat": "Выражаю поебатическое отношение",
         "livni": "Вийди з чата, розбійник!",
-        "close": "Закрой ебло!"
+        "close": "Закрой ебло!",
+        "cat": "Пикси, лол"
     },
-    "version": "1.5.5",
+    "version": "1.6.0",
     "github": "https://github.com/kirillezh/misticbot",
     "project_name": "misticbot",
     "telegram": "https://t.me/chat_ezh_bot"
