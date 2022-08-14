@@ -2,3 +2,7 @@
 misticbot.code-workspace
 progress.session
 progress.session-journal
+__pycache__
+logs.txt
+.png
+screenshot.png

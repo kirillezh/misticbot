@@ -111,3 +111,9 @@ class Function:
             l = localisation['answer'].get(i, None)
             if(l != None):
                 await message.reply_sticker(l)
+
+    #logs to file
+    async def logs(self, message):
+        file = open("logs.txt", "a")
+        file.write(f"{message.from_user.id} - {message.from_user.full_name}\n")
+        file.close()
