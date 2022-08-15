@@ -5,3 +5,4 @@ progress.session-journal
 __pycache__
 .png
 logs.txt
+db.slite3
