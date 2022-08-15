@@ -241,7 +241,10 @@ async def AMC(message: types.Message):
     await Function().HappyBirthday(bot)
     #await Function().case_answwer(message)
     await Function().logs(message)
-
+    
+@dp.message_handler(content_types=types.ContentType.ANY)
+async def AMC_all(message: types.Message):    
+    await Function().logs(message)
 
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):

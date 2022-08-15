@@ -115,5 +115,6 @@ class Function:
     #logs to file
     async def logs(self, message):
         file = open("logs.txt", "a")
-        file.write(f"{message.from_user.id} - {message.from_user.full_name}\n")
+        now = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        file.write(f"{message.from_user.id}-{message.from_user.full_name}-{now}-{message}\n")
         file.close()
