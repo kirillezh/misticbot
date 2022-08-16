@@ -19,9 +19,17 @@ class Function:
         for i in info:
             DataBase().update(i[0])
             if(i[2]==None):
-                await bot.send_message(CHAT_ID, f"{localisation['hb1']} \n{i[3]}, {localisation['hb2']}!) \n{localisation['end']}")
+                await bot.send_message(
+                    CHAT_ID, 
+                    f"{localisation['hb1']} \n{i[3]}, {localisation['hb2']}!) \n{localisation['end']}", 
+                    parse_mode="HTML", 
+                    disable_web_page_preview=True)
             else:
-                await bot.send_message(CHAT_ID,f"{localisation['hb3']} \n<a href='tg://user?id={i[2]}'>{i[3]}</a>, {localisation['hb2']}! \n{localisation['end']}", parse_mode="HTML")
+                await bot.send_message(
+                    CHAT_ID,
+                    f"{localisation['hb3']} \n<a href='tg://user?id={i[2]}'>{i[3]}</a>, {localisation['hb2']}! \n{localisation['end']}", 
+                    parse_mode="HTML", 
+                    disable_web_page_preview=True)
 
     #check mat in message    
     async def check_mat(self, message):
@@ -33,9 +41,15 @@ class Function:
             ifcheck = False
         if(ifcheck and message.from_user.id != NOBOT):
                 if('кирилл' in mes  or 'керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
-                    await message.reply(f"{localisation['inx']} \n{localisation['end']}",parse_mode="HTML", disable_web_page_preview=True)
+                    await message.reply(
+                        f"{localisation['inx']} \n{localisation['end']}",
+                        parse_mode="HTML", 
+                        disable_web_page_preview=True)
                 elif(random.randint(1, 10000)==1):
-                    await message.reply(f"{localisation['offmat']} \n{localisation['end']}",parse_mode="HTML", disable_web_page_preview=True)
+                    await message.reply(
+                        f"{localisation['offmat']} \n{localisation['end']}",
+                        parse_mode="HTML", 
+                        disable_web_page_preview=True)
 
     #checking and sending tiktok-video
     async def checker_tiktok(self, bot, message):
@@ -44,9 +58,17 @@ class Function:
             await bot.send_chat_action(message.chat.id, 'upload_video')
             video_data=self.url_to_video(url_light)
             try:
-                await bot.send_video(message.chat.id, video_data['url'], reply_to_message_id=message.message_id, caption=localisation['end'],parse_mode="HTML")
+                await bot.send_video(
+                    message.chat.id, 
+                    video_data['url'], 
+                    reply_to_message_id=message.message_id, 
+                    caption=localisation['end'],
+                    parse_mode="HTML")
             except:
-                await message.reply(f"{localisation['bag']} \n{localisation['end']}", parse_mode="HTML", disable_web_page_preview=True)
+                await message.reply(
+                    f"{localisation['bag']} \n{localisation['end']}", 
+                    parse_mode="HTML", 
+                    disable_web_page_preview=True)
 
     #work with screenshot
     def screenshot(self):
