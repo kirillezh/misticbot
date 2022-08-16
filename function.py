@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import datetime, random
 from roughfilter import search_obscene_words
 from time import sleep
+from pytube import YouTube
 
 from example import DRIVER, CHAT_ID, GMT, URL_TREVOG, NOBOT, localisation
 
@@ -69,6 +70,34 @@ class Function:
                     f"{localisation['bag']} \n{localisation['end']}", 
                     parse_mode="HTML", 
                     disable_web_page_preview=True)
+    
+    #checking and sending youtube-video
+    async def youtube_check(self, bot, message):
+        url=self.text_to_url(message.text)
+        if("youtube.com/" in url or "youtu.be/" in url):
+            await bot.send_chat_action(message.chat.id, 'upload_video')
+            file = self.checker_youtube(url)
+            if(file == 'error'):
+                await message.answer("Ошиб очка")
+            try:
+                await bot.send_video(
+                    message.chat.id, 
+                    file["link"],
+                    reply_to_message_id=message.message_id,
+                    caption=file["name"])
+            except:
+                pass
+    #url video
+    def checker_youtube(self, text):
+        yt = YouTube(text)
+        try:
+            vid = {
+                "link": yt.streams[1].url,
+                "name": yt.title
+            }
+            return vid
+        except:
+            return 'error'
 
     #work with screenshot
     def screenshot(self):
