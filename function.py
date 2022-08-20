@@ -11,14 +11,15 @@ from pytube import YouTube
 from example import DRIVER, CHAT_ID, GMT, URL_TREVOG, NOBOT, localisation
 
 from bd import DataBase
+db = DataBase()
 
 class Function:
     #happy birthday
     async def HappyBirthday(self, bot):   
         nowdate = datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))).strftime('%d.%m.%Y')
-        info = DataBase().find(nowdate)
+        info = db.find(nowdate)
         for i in info:
-            DataBase().update(i[0])
+            db.update(i[0])
             if(i[2]==None):
                 await bot.send_message(
                     CHAT_ID, 

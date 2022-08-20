@@ -14,6 +14,7 @@ from array import *
 from example import API_ID, API_HASH, CHAT_ID, NOBOT, CHANNEL, API_TOKEN, TREVOGA, OTBOY, localisation
 
 from function import Function
+function = Function()
 
 #start telethon
 client = TelegramClient('progress',API_ID, API_HASH)
@@ -29,14 +30,14 @@ dp = Dispatcher(bot)
 async def trevoga(message):
     await bot.send_chat_action(CHAT_ID, 'upload_photo')
     if(TREVOGA in str(message.message)):
-        photo = open(Function().screenshot(), 'rb')
+        photo = open(function.screenshot(), 'rb')
         await bot.send_photo(
             chat_id=CHAT_ID, 
             photo=photo, 
             caption=f"{random.sample(localisation['ptn_xuilo'], k=1)[0]} \n{localisation['end']}", 
             parse_mode="HTML")
     elif(OTBOY in str(message.message)):
-        photo = open(Function().screenshot(), 'rb')
+        photo = open(function.screenshot(), 'rb')
         await bot.send_photo(
             chat_id=CHAT_ID, 
             photo=photo, 
@@ -225,7 +226,7 @@ async def screen(message: types.Message):
             parse_mode="HTML", 
             disable_web_page_preview=True)
     else:
-        photo = open(Function().screenshot(), 'rb')
+        photo = open(function.screenshot(), 'rb')
         await bot.send_photo(
             chat_id=message.chat.id , 
             photo=photo, 
@@ -236,16 +237,16 @@ async def screen(message: types.Message):
 #AMC(All Message Checker)
 @dp.message_handler()
 async def AMC(message: types.Message):    
-    await Function().check_mat(message)
-    await Function().checker_tiktok(bot, message)
-    await Function().HappyBirthday(bot)
-    #await Function().case_answwer(message)
-    await Function().logs(message)
-    await Function().youtube_check(bot, message)
+    await function.check_mat(message)
+    await function.checker_tiktok(bot, message)
+    await function.HappyBirthday(bot)
+    #await function.case_answwer(message)
+    await function.logs(message)
+    await function.youtube_check(bot, message)
     
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def AMC_all(message: types.Message):    
-    await Function().logs(message)
+    await function.logs(message)
 
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):

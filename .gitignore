@@ -5,7 +5,7 @@ progress.session-journal
 __pycache__
 .png
 logs.txt
-db.slite3
+db.db
 trash
 .DS_Store
 screenshot.png
