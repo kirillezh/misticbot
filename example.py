@@ -28,7 +28,7 @@ localisation = {
     "bag": "Ошибка! Дам, это баг:(",
     "testtrevog":"чё за хуйня? а не, просто ТЕСТ!",
     "leave":"Эх... не выдержал токсичности группы и сбежал...",
-    "end": "<a href='https://secure.wayforpay.com/payment/ukraine.army'>Stand with Ukraine 🇺🇦🇺🇦🇺🇦</a>",
+    "end": "<a href='https://savelife.in.ua/donate/'>Слава Украине 🇺🇦🇺🇦🇺🇦</a>",
     "youcringe": "Ты кринж",
     "youxuesos": "Сам хуесос!",
     "youbot1": "Привет",
