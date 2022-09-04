@@ -12,7 +12,16 @@
         "close": "Закрой ебло!",
         "cat": "Пикси, лол"
     },
-    "version": "1.7.0",
+    "function":[
+        "Send air raid alert",
+        "Send nudes(oh, in future versions)",
+        "Compliments happy birthday (in the future - happy new year)",
+        "Screenshot alert(only to admin)",
+        "Logs all messages",
+        "Send tiktok and youtube video by url",
+        "Search mat)"
+    ],
+    "version": "2.0.0",
     "github": "https://github.com/kirillezh/misticbot",
     "project_name": "misticbot",
     "telegram": "https://t.me/chat_ezh_bot"

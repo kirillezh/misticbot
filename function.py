@@ -8,7 +8,7 @@ from roughfilter import search_obscene_words
 from time import sleep
 from pytube import YouTube
 
-from example import DRIVER, CHAT_ID, GMT, URL_TREVOG, NOBOT, localisation
+from example import DRIVER, CHAT_ID, GMT, URL_TREVOG, NOBOT, RANDOM, localisation
 
 from bd import DataBase
 db = DataBase()
@@ -34,7 +34,7 @@ class Function:
                     disable_web_page_preview=True)
 
     #check mat in message    
-    async def check_mat(self, message):
+    async def searchmat(self, message):
         mes=str(message.text)
         mes=mes.lower()
         try:
@@ -42,23 +42,35 @@ class Function:
         except:
             ifcheck = False
         if(ifcheck and message.from_user.id != NOBOT):
-                if('кирилл' in mes  or 'керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
-                    await message.reply(
-                        f"{localisation['inx']} \n{localisation['end']}",
-                        parse_mode="HTML", 
-                        disable_web_page_preview=True)
-                elif(random.randint(1, 10000)==1):
-                    await message.reply(
-                        f"{localisation['offmat']} \n{localisation['end']}",
-                        parse_mode="HTML", 
-                        disable_web_page_preview=True)
+            if('кирилл' in mes  or 'керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
+                await message.reply(
+                    f"{localisation['inx']} \n{localisation['end']}",
+                    parse_mode="HTML", 
+                    disable_web_page_preview=True)
+            elif(random.randint(1, int(RANDOM))==1):
+                await message.reply(
+                    f"{localisation['offmat']} \n{localisation['end']}",
+                    parse_mode="HTML", 
+                    disable_web_page_preview=True)
+
+    #search url from text
+    def searchurl(self, text):
+        split_text = text.split()
+        for i in split_text:
+            if "http" in i:
+                link = i
+        try:
+            return link
+        except:
+            return ''
+
 
     #checking and sending tiktok-video
-    async def checker_tiktok(self, bot, message):
-        url_light=self.text_to_url(message.text)
-        if("tiktok.com/" in url_light):
+    async def tiktoktovideo(self, bot, message):
+        url=self.searchurl(message.text)
+        if("tiktok.com/" in url):
             await bot.send_chat_action(message.chat.id, 'upload_video')
-            video_data=self.url_to_video(url_light)
+            video_data=self.tiktokapi(url)
             try:
                 await bot.send_video(
                     message.chat.id, 
@@ -71,13 +83,31 @@ class Function:
                     f"{localisation['bag']} \n{localisation['end']}", 
                     parse_mode="HTML", 
                     disable_web_page_preview=True)
-    
+
+    #search video from url
+    def tiktokapi(self, url):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument("--kiosk")
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
+        driver.get(url) 
+        video = dict()
+        sleep(2)
+        try:
+            video['url'] = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[2]/div/div/div/video').get_attribute('src'))
+        except:
+            video['url'] = ''
+        driver.quit()
+        return video
+
     #checking and sending youtube-video
-    async def youtube_check(self, bot, message):
-        url=self.text_to_url(message.text)
+    async def youtubetovideo(self, bot, message):
+        url=self.searchurl(message.text)
         if("youtube.com/" in url or "youtu.be/" in url):
             await bot.send_chat_action(message.chat.id, 'upload_video')
-            file = self.checker_youtube(url)
+            file = self.youtubeapi(url)
             if(file == 'error'):
                 await message.answer("Ошиб очка")
             try:
@@ -88,8 +118,9 @@ class Function:
                     caption=file["name"])
             except:
                 pass
+
     #url video
-    def checker_youtube(self, text):
+    def youtubeapi(self, text):
         yt = YouTube(text)
         try:
             vid = {
@@ -125,44 +156,6 @@ class Function:
         driver.save_screenshot("screenshot.png")
         driver.quit()
         return 'screenshot.png'
-
-    #search url from text
-    def text_to_url(self, text):
-        split_text = text.split()
-        for i in split_text:
-            if "http" in i:
-                link = i
-        try:
-            return link
-        except:
-            return ''
-
-
-    #search video from url
-    def url_to_video(self, url):
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument("--kiosk")
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
-        driver.get(url) 
-        video = dict()
-        sleep(2)
-        try:
-            video['url'] = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[2]/div/div/div/video').get_attribute('src'))
-        except:
-            video['url'] = ''
-        driver.quit()
-        return video
-    #answer 
-    async def case_answwer(self, message):
-        text = str(message.text)
-        split_text = text.lower().split()
-        for i in split_text:
-            l = localisation['answer'].get(i, None)
-            if(l != None):
-                await message.reply_sticker(l)
 
     #logs to file
     async def logs(self, message):

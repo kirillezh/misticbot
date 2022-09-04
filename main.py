@@ -2,13 +2,12 @@
 from time import sleep
 from telethon import TelegramClient, events
 from telethon.tl.types import Message
-
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types.input_media import *
 from aiogram.types import ContentType, Message
 
-import logging, random
+import logging, random, schedule, threading, time
 from array import *
 
 from example import API_ID, API_HASH, CHAT_ID, NOBOT, CHANNEL, API_TOKEN, TREVOGA, OTBOY, localisation
@@ -16,16 +15,16 @@ from example import API_ID, API_HASH, CHAT_ID, NOBOT, CHANNEL, API_TOKEN, TREVOG
 from function import Function
 function = Function()
 
-#start telethon
+# Start telethon
 client = TelegramClient('progress',API_ID, API_HASH)
 client.start()
 
-#start aiogram
+# Start aiogram
 bot = Bot(token=API_TOKEN)
 logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
 
-#Trevoga
+# Trevoga
 @client.on(events.NewMessage(chats=(CHANNEL)))
 async def trevoga(message):
     await bot.send_chat_action(CHAT_ID, 'upload_photo')
@@ -44,7 +43,7 @@ async def trevoga(message):
             caption=f"{localisation['otboy']}\n{localisation['end']}", 
             parse_mode="HTML")
 
-#Help
+# Help
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'typing')
@@ -53,7 +52,7 @@ async def start(message: types.Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
-#Poxui
+# Poxui
 @dp.message_handler(commands=['poxui'])
 async def pox(message: types.Message):   
     mes = random.sample(localisation['sticker_pox'], k=1)[0]
@@ -97,7 +96,7 @@ async def pox(message: types.Message):
                 'choose_sticker')
             await message.answer_sticker(mes)
 
-#Поебать
+# Poebat
 @dp.message_handler(commands=['poebat'])
 async def poebat(message: types.Message):   
     await bot.send_chat_action(message.chat.id, 'typing')
@@ -118,7 +117,7 @@ async def poebat(message: types.Message):
             f"{localisation['poebat']} \n{localisation['end']}", 
             parse_mode="HTML", 
             disable_web_page_preview=True)
-#Ливни
+# Livni
 @dp.message_handler(commands=['livni'])
 async def livni(message: types.Message):   
     await bot.send_chat_action(message.chat.id, 'typing')
@@ -163,18 +162,7 @@ async def xuilo(message: types.Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
-#HANDLE
-@dp.message_handler(commands=['kerilhuesos', 'Ответ'])
-async def reply(message: types.Message):
-    await bot.send_chat_action(
-        message.chat.id, 
-        'typing')
-    await message.reply(
-        f"{localisation['youxuesos']} \n{localisation['end']}", 
-        parse_mode="HTML", 
-        disable_web_page_preview=True)
-
-#Info
+# Info bot(log)
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
     with open("info.json", "r") as file:
@@ -186,7 +174,7 @@ async def info(message: types.Message):
             text, 
             disable_web_page_preview=True)
 
-#GIF
+# GIF with anumal
 @dp.message_handler(commands=['animal', 'gif'])
 async def gif(message: types.Message):
     await bot.send_chat_action(
@@ -195,7 +183,7 @@ async def gif(message: types.Message):
     await message.answer_sticker(
         random.choices(localisation['sticker_animal'], k=1)[0], 
         reply=message.message_id)
-#CAT
+# Cat(Piksi)
 @dp.message_handler(commands=['cat', 'Cat'])
 async def gif(message: types.Message):
     await bot.send_chat_action(
@@ -205,7 +193,7 @@ async def gif(message: types.Message):
         random.choices(localisation['sticker_cat'], k=1)[0], 
         reply=message.message_id)
 
-# Shut up
+# Close topic
 @dp.message_handler(commands=['close', 'Закрыть тему'])
 async def close(message: types.Message):
     await bot.send_chat_action(
@@ -216,7 +204,7 @@ async def close(message: types.Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
-#SCREENSHOT(ONLY TO @ezh_off)
+# Send a screenshot (only to admin)
 @dp.message_handler(commands=['screenshot', 'Скриншот'])
 async def screen(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'upload_photo')
@@ -234,20 +222,6 @@ async def screen(message: types.Message):
             reply_to_message_id=message.message_id, 
             parse_mode="HTML")
 
-#AMC(All Message Checker)
-@dp.message_handler()
-async def AMC(message: types.Message):    
-    await function.check_mat(message)
-    await function.checker_tiktok(bot, message)
-    await function.HappyBirthday(bot)
-    #await function.case_answwer(message)
-    await function.logs(message)
-    await function.youtube_check(bot, message)
-    
-@dp.message_handler(content_types=types.ContentType.ANY)
-async def AMC_all(message: types.Message):    
-    await function.logs(message)
-
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):
     await bot.send_chat_action(
@@ -256,7 +230,7 @@ async def new_members_handler(message: Message):
     new_member = message.new_chat_members[0]
     await bot.send_message(
         message.chat.id, 
-        f"{localisation['youbot1']}, {new_member.mention}. {localisation['youbot2']}!",
+        f"{localisation['youbot1']}, {new_member.mention}. {localisation['youbot2']}\n{localisation['end']}!",
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
@@ -270,6 +244,40 @@ async def new_members_handler(message: Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
+# AMC(All Message Checker)
+@dp.message_handler(content_types=types.ContentType.ANY)
+async def AMC_all(message: types.Message):    
+    await function.logs(message)
+    await function.searchmat(message)
+    await function.tiktoktovideo(bot, message)
+    await function.youtubetovideo(bot, message)
+
+
+def schedulework(interval=10):
+    cease_continuous_run = threading.Event()
+    '''I don't know how it works but it works
+        https://schedule.readthedocs.io/en/stable/background-execution.html
+    '''
+    class ScheduleThread(threading.Thread):
+        @classmethod
+        def run(cls):
+            while not cease_continuous_run.is_set():
+                schedule.run_pending()
+                time.sleep(interval)
+
+    continuous_thread = ScheduleThread()
+    continuous_thread.start()
+    return cease_continuous_run
+
+# 21:01 – because the server works in UTC, but I need GMT +3, you can change this
+schedule.every().day.at("21:01").do(Function.HappyBirthday, bot)
+
+
+
 if __name__ == '__main__':
+    # Start the background thread
+    schedulework()
+    
+    # Start bot
     executor.start_polling(dp, skip_updates=True)
     

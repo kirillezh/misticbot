@@ -14,6 +14,7 @@ URL_TREVOG = os.getenv('URL_TREVOG')
 GMT = int(os.getenv('GMT'))
 TREVOGA = os.getenv('TREVOGA')
 OTBOY = os.getenv('OTBOY')
+RANDOM = os.getenv('RANDOM')
 
 localisation = {
     "fuck_you":"Не смей оскорблять Кирилла! Ебал я тебя!",
