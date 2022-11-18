@@ -19,9 +19,10 @@
         "Screenshot alert(only to admin)",
         "Logs all messages",
         "Send tiktok and youtube video by url",
-        "Search mat)"
+        "Search mat)",
+        "Voicy to text!!!"
     ],
-    "version": "2.0.0",
+    "version": "2.5.0",
     "github": "https://github.com/kirillezh/misticbot",
     "project_name": "misticbot",
     "telegram": "https://t.me/chat_ezh_bot"
