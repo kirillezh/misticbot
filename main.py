@@ -56,62 +56,36 @@ async def start(message: types.Message):
 @dp.message_handler(commands=['poxui'])
 async def pox(message: types.Message):   
     mes = random.sample(localisation['sticker_pox'], k=1)[0]
-    try:
-        if(message.reply_to_message.from_user.id!=NOBOT):
-            if(random.randint(1,5)==1):
-                await bot.send_chat_action(
-                    message.chat.id, 
-                    'record_voice')
-                sleep(2)
-                await bot.send_voice(
-                    chat_id=message.chat.id, 
-                    voice=open('1.ogg', 'rb'),  
-                    caption=localisation['end'], 
-                    parse_mode="HTML")                
-            else:
-                await bot.send_chat_action(
-                    message.chat.id, 
-                    'choose_sticker')
-                await message.reply_to_message.answer_sticker(
-                    mes, 
-                    reply=message.reply_to_message)
-        else:
-            await message.answer(
-                f"Ты кринж {localisation['end']}", 
-                parse_mode="HTML", 
-                disable_web_page_preview=True)
-    except:
-        if(random.randint(1,5)==1):
-            await bot.send_chat_action(
-                message.chat.id, 
-                'record_voice')
-            await bot.send_voice(
-                chat_id=message.chat.id, 
-                voice=open('1.ogg', 'rb'),  
-                caption=localisation['end'], 
-                parse_mode="HTML")                
-        else:
-            await bot.send_chat_action(
-                message.chat.id, 
-                'choose_sticker')
-            await message.answer_sticker(mes)
+    if(random.randint(1,5)==1):
+        await bot.send_chat_action(
+            message.chat.id, 
+            'record_voice')
+        sleep(2)
+        await bot.send_voice(
+            chat_id=message.chat.id, 
+            voice=open('1.ogg', 'rb'),  
+            caption=localisation['end'], 
+            parse_mode="HTML")                
+    else:
+        await bot.send_chat_action(
+            message.chat.id, 
+            'choose_sticker')
+        await bot.send_sticker(
+            chat_id = message.chat.id,
+            sticker = mes)
+    
+
 
 # Poebat
 @dp.message_handler(commands=['poebat'])
 async def poebat(message: types.Message):   
     await bot.send_chat_action(message.chat.id, 'typing')
     try:
-        if(message.reply_to_message.from_user.id!=NOBOT):
-            await message.reply_to_message.answer(
-                f"{localisation['poebat']}\n{localisation['end']}", 
-                reply=message.reply_to_message, 
-                parse_mode="HTML", 
-                disable_web_page_preview=True)
-        else:
-            await message.answer(
-                f"{localisation['youcringe']} \n {localisation['end']}", 
-                parse_mode="HTML",
-                disable_web_page_preview=True)
+        await message.reply_to_message.answer(
+            f"{localisation['poebat']}\n{localisation['end']}", 
+            reply=message.reply_to_message, 
+            parse_mode="HTML", 
+            disable_web_page_preview=True)
     except:
         await message.answer(
             f"{localisation['poebat']} \n{localisation['end']}", 
@@ -122,17 +96,11 @@ async def poebat(message: types.Message):
 async def livni(message: types.Message):   
     await bot.send_chat_action(message.chat.id, 'typing')
     try:
-        if(message.reply_to_message.from_user.id!=NOBOT):
-            await message.reply_to_message.answer(
-                f"{localisation['livni']}\n{localisation['end']}", 
-                reply=message.reply_to_message, 
-                parse_mode="HTML", 
-                disable_web_page_preview=True)
-        else:
-            await message.answer(
-                f"{localisation['youcringe']} \n {localisation['end']}",
-                parse_mode="HTML", 
-                disable_web_page_preview=True)
+        await message.reply_to_message.answer(
+            f"{localisation['livni']}\n{localisation['end']}", 
+            reply=message.reply_to_message, 
+            parse_mode="HTML", 
+            disable_web_page_preview=True)
     except:
         await message.answer(
             f"{localisation['livni']}\n{localisation['end']}", 
@@ -162,7 +130,7 @@ async def xuilo(message: types.Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
-# Info bot(log)
+# Info bot
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
     with open("info.json", "r") as file:
@@ -174,7 +142,7 @@ async def info(message: types.Message):
             text, 
             disable_web_page_preview=True)
 
-# GIF with anumal
+# GIF with animal
 @dp.message_handler(commands=['animal', 'gif'])
 async def gif(message: types.Message):
     await bot.send_chat_action(
@@ -183,6 +151,7 @@ async def gif(message: types.Message):
     await message.answer_sticker(
         random.choices(localisation['sticker_animal'], k=1)[0], 
         reply=message.message_id)
+
 # Cat(Piksi)
 @dp.message_handler(commands=['cat', 'Cat'])
 async def gif(message: types.Message):
@@ -247,17 +216,32 @@ async def new_members_handler(message: Message):
 # AMC(All Message Checker)
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def AMC_all(message: types.Message):    
-    await function.logs(message)
+    try:
+        await function.logs(message)
+        if(message.content_type in [types.ContentType.VOICE, types.ContentType.VIDEO_NOTE]):
+            await function.voicy2text(bot, message)
+        await function.searchmat(message)
+        await function.tiktoktovideo(bot, message)
+        await function.youtubetovideo(bot, message)
+    except:
+        pass
+'''
+@dp.message_handler(content_types=types.ContentType.)
+async def AMC(message: types.Message):   
     await function.searchmat(message)
     await function.tiktoktovideo(bot, message)
     await function.youtubetovideo(bot, message)
-
-
+'''
+'''
+@dp.message_handler(content_types=['voice', 'video_note'])
+async def get_audio_messages(message: types.Message):
+    '''
+'''
 def schedulework(interval=10):
     cease_continuous_run = threading.Event()
-    '''I don't know how it works but it works
-        https://schedule.readthedocs.io/en/stable/background-execution.html
-    '''
+    #I don't know how it works but it works   |   Don't work))
+    #https://schedule.readthedocs.io/en/stable/background-execution.html
+    
     class ScheduleThread(threading.Thread):
         @classmethod
         def run(cls):
@@ -271,12 +255,11 @@ def schedulework(interval=10):
 
 # 21:01 – because the server works in UTC, but I need GMT +3, you can change this
 schedule.every().day.at("21:01").do(Function.HappyBirthday, bot)
-
-
+'''
 
 if __name__ == '__main__':
     # Start the background thread
-    schedulework()
+    # schedulework()
     
     # Start bot
     executor.start_polling(dp, skip_updates=True)

@@ -12,7 +12,6 @@ RUN sh -c "echo 'deb http://dl.google.com/linux/chrome/deb/ stable main' >>   /e
 # Updating apt to see and install Google Chrome
 RUN apt-get -y update
 
-# Magic happens
 RUN apt-get install -y google-chrome-stable
 
 RUN apt-get install -yqq unzip
@@ -23,6 +22,9 @@ curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux6
 
 # Unzip the Chrome Driver into /usr/local/bin directory
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+
+#install ffmpeg
+RUN apk add -q --progress --update --no-cache ffmpeg
 
 #install python dependencies
 COPY requirements.txt requirements.txt 

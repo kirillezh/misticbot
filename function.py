@@ -32,7 +32,29 @@ class Function:
                     f"{localisation['hb3']} \n<a href='tg://user?id={i[2]}'>{i[3]}</a>, {localisation['hb2']}! \n{localisation['end']}", 
                     parse_mode="HTML", 
                     disable_web_page_preview=True)
+    #voicy2text
+    async def voicy2text(self, bot, message):
+        msg = await message.answer(
+            f"{localisation['load_v2t']}\n{localisation['end']}", 
+            parse_mode="HTML", 
+            disable_web_page_preview=True,
+            reply=message.message_id)
+        import os
+        from convert import Converter
+        file_id = message.voice.file_id if message.content_type in ['voice'] else message.video_note.file_id
+        file_info = await bot.get_file(file_id)
+        file_name = str(message.message_id) + '.ogg'
+        downloaded_file = await bot.download_file(file_info.file_path, file_name)
+        converter = Converter(file_name)
+        os.remove(file_name)
+        message_text = converter.audio_to_text()
+        del converter
+        await msg.edit_text(
+            f"{message_text}\n{localisation['end']}",
+            parse_mode="HTML", 
+            disable_web_page_preview=True)
 
+        
     #check mat in message    
     async def searchmat(self, message):
         mes=str(message.text)
@@ -42,7 +64,7 @@ class Function:
         except:
             ifcheck = False
         if(ifcheck and message.from_user.id != NOBOT):
-            if('кирилл' in mes  or 'керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
+            if('керил' in mes or 'кирил' in mes or 'крил' in mes or 'киирил' in mes):
                 await message.reply(
                     f"{localisation['inx']} \n{localisation['end']}",
                     parse_mode="HTML", 
