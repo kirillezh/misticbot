@@ -24,7 +24,7 @@ curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux6
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 
 #install ffmpeg
-RUN apk add -q --progress --update --no-cache ffmpeg
+RUN apt-get install -y ffmpeg
 
 #install python dependencies
 COPY requirements.txt requirements.txt 
