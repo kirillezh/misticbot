@@ -1,29 +1,17 @@
 {
-    "name": "Бот чата🤖",
+    "name": "Бот чату🤖",
     "description": "Бот по приколу.",
-    "command": {
-        "start": "Стартуем...",
-        "bot": "Кто бот?",
-        "putin": "Кто путин?",
-        "animal": "Всякие Gif-ки",
-        "poxui": "Выражаю абсолютное пофигистическое отношение",
-        "poebat": "Выражаю поебатическое отношение",
-        "livni": "Вийди з чата, розбійник!",
-        "close": "Закрой ебло!",
-        "cat": "Пикси, лол"
+    "link": "https://t.me/chat_ezh_bot",
+    "commands": {
+        "start": "Починаємо...",
+        "info": "Шайтан-машина"
     },
-    "function":[
-        "Send air raid alert",
-        "Send nudes(oh, in future versions)",
-        "Compliments happy birthday (in the future - happy new year)",
-        "Screenshot alert(only to admin)",
-        "Logs all messages",
-        "Send tiktok and youtube video by url",
-        "Search mat)",
-        "Voicy to text!!!"
+    "functions":[
+        "Надсилання повідомлень про тривогу і відбій з картою тривог",
+        "Конвертування Youtube та TikTok посилань на відео",
+        "Конвертування ваших голосових та відео-повідомлень у текст"
     ],
-    "version": "2.5.0",
-    "github": "https://github.com/kirillezh/misticbot",
-    "project_name": "misticbot",
-    "telegram": "https://t.me/chat_ezh_bot"
+    "version": "3.0.0",
+    "projectName": "misticbot",
+    "GitHub": "https://github.com/kirillezh/misticbot"
 }
