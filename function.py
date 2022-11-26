@@ -44,15 +44,20 @@ class Function:
         file_id = message.voice.file_id if message.content_type in ['voice'] else message.video_note.file_id
         file_info = await bot.get_file(file_id)
         file_name = str(message.message_id) + '.ogg'
-        downloaded_file = await bot.download_file(file_info.file_path, file_name)
+        await bot.download_file(file_info.file_path, file_name)
         converter = Converter(file_name)
         os.remove(file_name)
         message_text = converter.audio_to_text()
         del converter
-        await msg.edit_text(
-            f"{message_text}\n{localisation['end']}",
+        if(message_text == None):
+            return await msg.edit_text(
+            f"{localisation['fail_v2t']}\n{localisation['end']}",
             parse_mode="HTML", 
             disable_web_page_preview=True)
+        return await msg.edit_text(
+                f"{message_text}\n{localisation['end']}",
+                parse_mode="HTML", 
+                disable_web_page_preview=True)
 
         
     #check mat in message    

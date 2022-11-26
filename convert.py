@@ -16,7 +16,17 @@ class Converter:
             audio = r.record(source)
             r.adjust_for_ambient_noise(source)
 
-        return r.recognize_google(audio, language=self.language)
+        result = r.recognize_google(audio, language=self.language, show_all=True)
+        if(result == []):
+            return None
+        res = self.localisation(result['alternative'][0]['transcript'])
+        return res
+
+    def localisation(self, text):
+        from example import localisation
+        for i, j in localisation['local_v2t'].items():
+            text = text.replace(i, j)
+        return text
 
     def __del__(self):
         os.remove(self.wav_file)
