@@ -11,7 +11,7 @@
         "Конвертування Youtube та TikTok посилань на відео",
         "Конвертування ваших голосових та відео-повідомлень у текст"
     ],
-    "version": "3.0.0",
+    "version": "3.0.1",
     "projectName": "misticbot",
     "GitHub": "https://github.com/kirillezh/misticbot"
 }

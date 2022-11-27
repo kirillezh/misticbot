@@ -16,29 +16,28 @@ function = Function()
 
 # Start telethon
 client = TelegramClient('progress',API_ID, API_HASH)
+logging.basicConfig(format='[%(levelname) 5s] %(name)s: %(message)s',
+                    level=logging.INFO)
 client.start()
 
 # Start aiogram
 bot = Bot(token=API_TOKEN)
-logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
 
 #Siren
-@client.on(events.NewMessage(chats=(CHANNEL)))
-async def trevoga(message):
+@client.on(events.NewMessage(chats=[CHANNEL]))
+async def siren(message):
     await bot.send_chat_action(CHAT_ID, 'upload_photo')
     if(SIREN in str(message.message)):
-        photo = open(function.screenshot(), 'rb')
         await bot.send_photo(
             chat_id=CHAT_ID, 
-            photo=photo, 
+            photo=open(function.screenshot(), 'rb'), 
             caption=f"{random.sample(localisation['ptn_xuilo'], k=1)[0]} \n{localisation['end']}", 
             parse_mode="HTML")
     elif(END in str(message.message)):
-        photo = open(function.screenshot(), 'rb')
         await bot.send_photo(
             chat_id=CHAT_ID, 
-            photo=photo, 
+            photo=open(function.screenshot(), 'rb'), 
             caption=f"{localisation['vidboy']}\n{localisation['end']}", 
             parse_mode="HTML")
 
@@ -46,7 +45,6 @@ async def trevoga(message):
 @dp.message_handler(commands=['screenshot'])
 async def screenshot(message: types.Message):
     await bot.send_chat_action(message.chat.id, 'upload_photo')
-
     await bot.send_photo(
         chat_id=message.chat.id , 
         photo=open(function.screenshot(), 'rb'), 
@@ -66,6 +64,7 @@ async def start(message: types.Message):
 #Info bot
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
+    await bot.send_chat_action(message.chat.id, 'typing')
     with open("info.json", "r") as file:
         lines =file.readlines()
         text = ''
@@ -99,11 +98,12 @@ async def left_members_handler(message: Message):
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def mdc_all(message: types.Message):    
     try:
-        await function.logs(message)
-        await function.tiktoktovideo(bot, message)
-        await function.youtubetovideo(bot, message)
         if(message.content_type in [types.ContentType.VOICE, types.ContentType.VIDEO_NOTE]):
-            await function.voicy2text(bot, message)
+                await function.voicy2text(bot, message)
+        await function.logs(message)
+        if(message.content_type in [types.ContentType.TEXT]):
+            await function.tiktoktovideo(bot, message)
+            await function.youtubetovideo(bot, message)
     except:
         pass
 #Start bot
