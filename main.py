@@ -61,6 +61,15 @@ async def start(message: types.Message):
         parse_mode="HTML", 
         disable_web_page_preview=True)
 
+#Start
+@dp.message_handler(commands=['alert'])
+async def alert(message: types.Message):
+    await bot.send_chat_action(message.chat.id, 'typing')
+    await message.reply(
+        f"{localisation['alert']} \n{localisation['end']}",
+        parse_mode="HTML", 
+        disable_web_page_preview=True)
+
 #Info bot
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
