@@ -23,7 +23,7 @@ class Converter:
         return res
 
     def localisation(self, text):
-        from example import localisation
+        from src.locales import localisation
         for i, j in localisation['local_v2t'].items():
             text = text.replace(i, j)
         return text

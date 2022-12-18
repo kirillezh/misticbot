@@ -4,117 +4,75 @@ from telethon.tl.types import Message
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types.input_media import *
-from aiogram.types import ContentType, Message
+from aiogram.types import ContentType
 
 import logging, random
 from array import *
 
-from example import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation
+from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation
 
-from function import Function
-function = Function()
+logging.basicConfig(format='[%(levelname) 5s] %(name)s: %(message)s', level=logging.INFO)
 
 # Start telethon
-client = TelegramClient('progress',API_ID, API_HASH)
-logging.basicConfig(format='[%(levelname) 5s] %(name)s: %(message)s',
-                    level=logging.INFO)
+client = TelegramClient('session',API_ID, API_HASH)
 client.start()
 
 # Start aiogram
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
+from src.function import Function
+from src.telegramAPI import telegramAPI
+function = Function(bot)
+botAPI = telegramAPI(bot)
+
 #Siren
 @client.on(events.NewMessage(chats=[CHANNEL]))
 async def siren(message):
-    await bot.send_chat_action(CHAT_ID, 'upload_photo')
-    if(SIREN in str(message.message)):
-        await bot.send_photo(
-            chat_id=CHAT_ID, 
-            photo=open(function.screenshot(), 'rb'), 
-            caption=f"{random.sample(localisation['ptn_xuilo'], k=1)[0]} \n{localisation['end']}", 
-            parse_mode="HTML")
+    await botAPI.sendReaction(CHAT_ID, 'upload_photo')
+    if SIREN in str(message.message):
+        caption = random.sample(localisation['ptn_xuilo'], k=1)[0]
     elif(END in str(message.message)):
-        await bot.send_photo(
-            chat_id=CHAT_ID, 
-            photo=open(function.screenshot(), 'rb'), 
-            caption=f"{localisation['vidboy']}\n{localisation['end']}", 
-            parse_mode="HTML")
+        caption = localisation['vidboy']
+    await botAPI.sendPhoto(CHAT_ID, function.screenshot(), caption)
 
 #Send a screenshot
 @dp.message_handler(commands=['screenshot'])
 async def screenshot(message: types.Message):
-    await bot.send_chat_action(message.chat.id, 'upload_photo')
-    await bot.send_photo(
-        chat_id=message.chat.id , 
-        photo=open(function.screenshot(), 'rb'), 
-        caption=f"{localisation['screenshot']}\n{localisation['end']}", 
-        reply_to_message_id=message.message_id, 
-        parse_mode="HTML")
+    await botAPI.sendReaction(message.chat.id, 'upload_photo')
+    await botAPI.sendPhoto(CHAT_ID, function.screenshot(), localisation['screenshot'], message.message_id)
 
 #Start
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    await message.reply(
-        f"{localisation['start']} \n{localisation['end']}",
-        parse_mode="HTML", 
-        disable_web_page_preview=True)
+    await botAPI.reply(message, localisation['start'])
 
-#Start
+#Alert
 @dp.message_handler(commands=['alert'])
 async def alert(message: types.Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    await message.reply(
-        f"{localisation['alert']} \n{localisation['end']}",
-        parse_mode="HTML", 
-        disable_web_page_preview=True)
+    await botAPI.reply(message, localisation['alert'])
 
-#Info bot
+#Info 
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    with open("info.json", "r") as file:
-        lines =file.readlines()
-        text = ''
-        for line in lines:
-            text += line
-        await message.reply(
-            text, 
-            disable_web_page_preview=True)
-#Welcome to the new member
-@dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
-async def new_members_handler(message: Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    await bot.send_message(
-        message.chat.id, 
-        f"{localisation['youbot1']}, {message.new_chat_members[0].mention}. {localisation['youbot2']}\n{localisation['end']}!",
-        parse_mode="HTML", 
-        disable_web_page_preview=True,
-        reply_to_message_id=message.message_id)
-#Missing a former member
-@dp.message_handler(content_types=[ContentType.LEFT_CHAT_MEMBER])
-async def left_members_handler(message: Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    await bot.send_message(
-        message.chat.id, 
-        f"{localisation['leave']}\n{localisation['end']}",
-        parse_mode="HTML", 
-        disable_web_page_preview=True,
-        reply_to_message_id=message.message_id)
+    await botAPI.reply(message, open("info.json", "r").read(), end="")
 
 #Message distribution center
 @dp.message_handler(content_types=types.ContentType.ANY)
-async def mdc_all(message: types.Message):    
+async def mdc_all(message: types.Message):
     try:
-        if(message.content_type in [types.ContentType.VOICE, types.ContentType.VIDEO_NOTE]):
-                await function.voicy2text(bot, message)
         await function.logs(message)
+        if(message.content_type in [ContentType.NEW_CHAT_MEMBERS]):
+            await botAPI.reply(message, localisation['youbot1']+", "+message.new_chat_members[0].mention+". "+localisation['youbot2']+"!")
+        if(message.content_type in [ContentType.LEFT_CHAT_MEMBER]):
+            await botAPI.reply(message, localisation['leave'])
+        if(message.content_type in [types.ContentType.VOICE, types.ContentType.VIDEO_NOTE]):
+            await function.voicy2text(message)
         if(message.content_type in [types.ContentType.TEXT]):
-            await function.tiktoktovideo(bot, message)
-            await function.youtubetovideo(bot, message)
-    except:
-        pass
+            await function.tiktoktovideo(message)
+            await function.youtubetovideo(message)
+    except Exception as e:
+        logging.warning('Error at %s', 'division', exc_info=e)
 #Start bot
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

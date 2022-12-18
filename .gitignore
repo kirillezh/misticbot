@@ -1,7 +1,7 @@
 .env
 misticbot.code-workspace
-progress.session
-progress.session-journal
+.vscode
+session.*
 __pycache__
 .png
 logs.txt
