@@ -46,11 +46,11 @@ async def screenshot(message: types.Message):
     else:
         theme = 'dark'
     try: 
-        msg = await botAPI.sendPhoto(CHAT_ID, f"src/img/{theme}.png", localisation['screenshot'], message.message_id)
+        msg = await botAPI.sendPhoto(message.chat.id, f"src/img/{theme}.png", localisation['screenshot'], message.message_id)
         await botAPI.sendReaction(message.chat.id, 'upload_photo')
         await botAPI.editPhoto(msg, function.screenshot(), localisation['screenshot'])
     except:
-        msg = await botAPI.sendPhoto(CHAT_ID, f"src/img/{theme}.png", localisation['screenshot'])
+        msg = await botAPI.sendPhoto(message.chat.id, f"src/img/{theme}.png", localisation['screenshot'])
         await botAPI.sendReaction(message.chat.id, 'upload_photo')
         await botAPI.editPhoto(msg, function.screenshot(), localisation['screenshot'])
 
