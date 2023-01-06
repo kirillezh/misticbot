@@ -65,6 +65,12 @@ class telegramAPI:
             f"{text}{end}",
             parse_mode="HTML", 
             disable_web_page_preview=disableURL)
+    async def editPhoto(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
+        from aiogram import types
+        return await message.edit_media(
+            media = types.InputMediaPhoto(open(photoId, 'rb'),
+            caption = f"{text}{end}",
+            parse_mode="HTML"))
 
     async def sendReaction(self, toChat: str, react: str = 'typing'):
         return await self.bot.send_chat_action(toChat, react)

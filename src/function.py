@@ -99,6 +99,7 @@ class Function:
         if("youtube.com/" in url or "youtu.be/" in url):
             await self.botAPI.sendReaction(message.chat.id, 'upload_video')
             file = self.youtubeapi(url)
+            #print(file)
             try:
                 await self.botAPI.sendVideoURL(
                     toСhat = message.chat.id, 
@@ -110,8 +111,24 @@ class Function:
 
     #url video
     def youtubeapi(self, text):
+        from yt_dlp import YoutubeDL
+        yt = YoutubeDL()
+        r = yt.extract_info(text, download=False)
+        urls = [format['url'] for format in r['formats']]
+        urls = [f['url'] for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none']
+        try:
+                vid = {
+                    "link": urls[0],
+                    "name": r['title']
+                }
+                return vid
+        except:
+                return 'error'
+
+    def youtubeapiOLD(self, text):
         from pytube import YouTube
         yt = YouTube(text)
+        print(yt.embed_html)
         try:
             vid = {
                 "link": yt.streams[1].url,
@@ -132,13 +149,13 @@ class Function:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument("--disable-setuid-sandbox")
         driver = webdriver.Chrome(DRIVER, chrome_options=chrome_options)
-        driver.set_window_size(1680, 1200)
+        driver.set_window_size(1600, 1200)
         driver.get(URL)
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
         if time_h in range(8, 22):
             theme = 'light'
         else:
-            theme = 'dark'
+            theme = 'black-preset'
         try:
             WebDriverWait(driver, timeout=10).until(lambda d: d.execute_script(f"arguments[0].setAttribute('class','{theme} menu-hidden')", driver.find_element(By.TAG_NAME, 'html')))
         except:
