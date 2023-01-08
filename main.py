@@ -25,7 +25,6 @@ from src.function import Function
 from src.telegramAPI import telegramAPI
 function = Function(bot)
 botAPI = telegramAPI(bot)
-bot.edit_message_media
 #Siren
 @client.on(events.NewMessage(chats=[CHANNEL]))
 async def siren(message):
