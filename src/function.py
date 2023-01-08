@@ -1,10 +1,36 @@
 from src.locales import DRIVER, GMT, URL, localisation
 import logging 
 from src.telegramAPI import telegramAPI
+
+class loggerYT(object):
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        print(msg)
+
 class Function:
     def __init__(self, bot):
         self.botAPI = telegramAPI(bot)
-        
+    
+    async def screenshotSend(self, chatID: int, caption:str, message_id: int = None):
+        import datetime
+        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+        if time_h in range(8, 22):
+            theme = 'light'
+        else:
+            theme = 'dark'
+        try:
+            msg = await self.botAPI.sendPhotobyID(chatID, localisation['img'][theme], caption, message_id)
+        except:
+            msg = await self.botAPI.sendPhotobyID(chatID, localisation['img'][theme], caption)
+        await self.botAPI.sendReaction(chatID, 'upload_photo')
+        return await self.botAPI.editPhoto(msg, self.screenshot(), caption)
+    
+
     #voicy2text
     async def voicy2text(self, message):
         import os
@@ -38,13 +64,23 @@ class Function:
     async def tiktoktovideo(self, message):
         url=self.searchurl(message.text)
         if("vm.tiktok.com/" in url):
-            await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-            video_data = self.tiktokAPI(url)
+            import datetime
+            time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+            if time_h in range(8, 22):
+                theme = 'light_sqr'
+            else:
+                theme = 'dark_sqr'
             try:
-                await self.botAPI.sendVideoURL(
-                    toСhat = message.chat.id, 
-                    videoURL = video_data, 
-                    messageId = message.message_id)
+                msg = await self.botAPI.sendPhotobyID(
+                toСhat = message.chat.id, 
+                photoId = localisation['img'][theme], 
+                messageId = message.message_id)
+                await self.botAPI.sendReaction(message.chat.id, 'upload_video')
+                video_data = self.tiktokAPI(url)
+                await self.botAPI.editVideo(
+                    message= msg,
+                    videoId = video_data["link"], 
+                    text= video_data["name"])
             except Exception as e:
                 logging.warning('Error at %s', 'division', exc_info=e)
             
@@ -63,11 +99,14 @@ class Function:
         driver.get(url) 
         video = dict()
         try:
-            video = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.TAG_NAME, value='video').get_attribute('src'))
+            vid = {
+                "link": WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.TAG_NAME, value='video').get_attribute('src')),
+                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[3]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div').text)
+            }
         except:
-            video = self.tiktokAPIaletrnative(url=url)
+            vid = self.tiktokAPIaletrnative(url=url)
         driver.quit()
-        return video
+        return vid
     
     #search video from url
     def tiktokAPIaletrnative(self, url):
@@ -86,12 +125,15 @@ class Function:
         urlField.send_keys(url)
         urlField.send_keys(Keys.ENTER)
         try:
-            video = WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[2]/div/a[1]').get_attribute('href'))
+            vid = {
+                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[2]/div/a[1]').get_attribute('href')),
+                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[1]/div/div[2]/div[1]').text)
+            }
         except:
-            video = ""
+            vid = ""
             pass
         driver.quit()
-        return video
+        return vid
 
     #checking and sending youtube-video
     async def youtubetovideo(self, message):
@@ -99,31 +141,36 @@ class Function:
         if("youtube.com/" in url or "youtu.be/" in url):
             await self.botAPI.sendReaction(message.chat.id, 'upload_video')
             file = self.youtubeapi(url)
-            #print(file)
             try:
-                await self.botAPI.sendVideoURL(
-                    toСhat = message.chat.id, 
-                    videoURL = file["link"], 
-                    messageId = message.message_id,
-                    caption = file["name"])
+                if(file != None):
+                    await self.botAPI.sendVideoURL(
+                        toСhat = message.chat.id, 
+                        videoURL = file["link"], 
+                        messageId = message.message_id,
+                        caption = file["name"])
             except Exception as e:
                 logging.warning('Error at %s', 'division', exc_info=e)
 
     #url video
     def youtubeapi(self, text):
         from yt_dlp import YoutubeDL
-        yt = YoutubeDL()
+        ydl_opts = {'logger':loggerYT()}
+        yt = YoutubeDL(ydl_opts)
         r = yt.extract_info(text, download=False)
-        urls = [format['url'] for format in r['formats']]
-        urls = [f['url'] for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none']
+        try:
+            urls = [f for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none' and f['filesize_approx'] < 20900000]         
+        except KeyError as e:
+            urls = [f for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none' and ( (f['filesize'] != None and f['filesize'] < 20900000))]
+        if(urls == []):
+            return None
         try:
                 vid = {
-                    "link": urls[0],
+                    "link": urls[0]['url'],
                     "name": r['title']
                 }
                 return vid
         except:
-                return 'error'
+                return None
 
     def youtubeapiOLD(self, text):
         from pytube import YouTube

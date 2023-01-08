@@ -2,7 +2,22 @@ from src.locales import localisation
 class telegramAPI:
     def __init__(self, bot):
         self.bot=bot
-        
+
+    async def sendPhotobyID(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, end: str = " \n"+localisation['end']):
+        if messageId is None:
+            return await self.bot.send_photo(
+                chat_id=toСhat, 
+                photo=photoId, 
+                caption=f"{caption} {end}", 
+                parse_mode="HTML")
+        else:
+            return await self.bot.send_photo(
+                chat_id=toСhat, 
+                photo=photoId, 
+                caption=f"{caption} {end}", 
+                parse_mode="HTML",
+                reply_to_message_id=messageId)
+
     async def sendPhoto(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, end: str = " \n"+localisation['end']):
         if messageId is None:
             return await self.bot.send_photo(
@@ -65,12 +80,33 @@ class telegramAPI:
             f"{text}{end}",
             parse_mode="HTML", 
             disable_web_page_preview=disableURL)
+    async def editVideo(self, message, videoId: str, text: str, end: str = " \n"+localisation['end']):
+        from aiogram import types
+        await self.bot.edit_message_media(
+        media = types.InputMediaVideo(videoId,
+            caption = f"{text}{end}",
+            parse_mode="HTML"),
+        chat_id = message.chat.id,
+        message_id = message.message_id
+        )
+    async def editPhotobyID(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
+        from aiogram import types
+        await self.bot.edit_message_media(
+        media = types.InputMediaPhoto(photoId,
+            caption = f"{text}{end}",
+            parse_mode="HTML"),
+        chat_id = message.chat.id,
+        message_id = message.message_id
+        )   
     async def editPhoto(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
         from aiogram import types
-        return await message.edit_media(
-            media = types.InputMediaPhoto(open(photoId, 'rb'),
+        await self.bot.edit_message_media(
+        media = types.InputMediaPhoto(open(photoId, 'rb'),
             caption = f"{text}{end}",
-            parse_mode="HTML"))
+            parse_mode="HTML"),
+        chat_id = message.chat.id,
+        message_id = message.message_id
+        )   
 
     async def sendReaction(self, toChat: str, react: str = 'typing'):
         return await self.bot.send_chat_action(toChat, react)

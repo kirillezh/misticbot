@@ -9,9 +9,9 @@ from aiogram.types import ContentType
 import logging, random
 from array import *
 
-from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation, GMT
+from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation, GMT, LEVELLOGGINING
 
-logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
 
 # Start telethon
 client = TelegramClient('session',API_ID, API_HASH)
@@ -25,34 +25,21 @@ from src.function import Function
 from src.telegramAPI import telegramAPI
 function = Function(bot)
 botAPI = telegramAPI(bot)
-
+bot.edit_message_media
 #Siren
 @client.on(events.NewMessage(chats=[CHANNEL]))
 async def siren(message):
-    await botAPI.sendReaction(CHAT_ID, 'upload_photo')
-    if SIREN in str(message.message):
-        caption = random.sample(localisation['ptn_xuilo'], k=1)[0]
-    elif(END in str(message.message)):
-        caption = localisation['vidboy']
-    await botAPI.sendPhoto(CHAT_ID, function.screenshot(), caption)
+    if SIREN in str(message.message) or END in str(message.message):
+        if SIREN in str(message.message):
+            caption = random.sample(localisation['ptn_xuilo'], k=1)[0]
+        elif(END in str(message.message)):
+            caption = localisation['vidboy']
+        await function.screenshotSend(CHAT_ID, caption)
 
 #Send a screenshot
 @dp.message_handler(commands=['screenshot'])
 async def screenshot(message: types.Message):
-    import datetime
-    time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-    if time_h in range(8, 22):
-        theme = 'light'
-    else:
-        theme = 'dark'
-    try: 
-        msg = await botAPI.sendPhoto(message.chat.id, f"src/img/{theme}.png", localisation['screenshot'], message.message_id)
-        await botAPI.sendReaction(message.chat.id, 'upload_photo')
-        await botAPI.editPhoto(msg, function.screenshot(), localisation['screenshot'])
-    except:
-        msg = await botAPI.sendPhoto(message.chat.id, f"src/img/{theme}.png", localisation['screenshot'])
-        await botAPI.sendReaction(message.chat.id, 'upload_photo')
-        await botAPI.editPhoto(msg, function.screenshot(), localisation['screenshot'])
+    await function.screenshotSend(message.chat.id, localisation['screenshot'], message.message_id)
 
 #Start
 @dp.message_handler(commands=['start'])
