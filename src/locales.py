@@ -67,13 +67,13 @@ localisation = {
         'Покажіть вже путіну Слідана, а то задовбав захищати...'
         ],
     "img": {
-        'light': 'AgACAgIAAxkDAAIHUWO6nJU7LQR45HYVEZP0lBCNSe4XAALpxzEbjNzASWVTUgy0MDWFAQADAgADcwADLQQ',
-        'dark': 'AgACAgIAAxkDAAIHVWO6nVQqSQkAAXPEMhonrrnedLu8KwAC0ccxG4zcwEnAXPNNbecRwwEAAwIAA3MAAy0E',
-        'light_sqr': 'AgACAgIAAxkDAAIHX2O6n5HjWgxO8syY3BrdZ3NvRcmjAAJxxzEbeTzZSYGUiX9iv9tWAQADAgADcwADLQQ',
-        'dark_sqr': 'AgACAgIAAxkDAAIHXWO6n2t2ey52jOQ8cZEmmVHg1s-dAAJwxzEbeTzZScFXQm7LixAVAQADAgADcwADLQQ'
+        'light': 'AgACAgIAAxkBAAISAWO6vp-F6zG2VdiQZqCZ3Gx37F_JAAILxjEbefLQSbfbDTuCvs_8AQADAgADeQADLQQ',
+        'dark': 'AgACAgIAAxkBAAISA2O6vqv__idHf1t8ClEwgf-u3mp7AAIMxjEbefLQSYijIoX7u60VAQADAgADeQADLQQ',
+        'light_sqr': 'AgACAgIAAxkBAAIR_WO6vjrvqpup_nw04n4S_pHGfSVwAAIIxjEbefLQSdgbt0A4Kw6OAQADAgADeQADLQQ',
+        'dark_sqr': 'AgACAgIAAxkBAAIR-2O6vizMq4QpO2JTA8kr9bSAnnnSAAKbwzEb-_jZSWP8wkX-M6YaAQADAgADeQADLQQ'
     },
     'error_img':{
-        'light_sqr': 'AgACAgIAAxkDAAIHbmO6ozHa2snb5xEiVEgBqoY_Su3qAAJ0xzEbeTzZSXC3ma9dnPBSAQADAgADcwADLQQ',
-        'dark_sqr': 'AgACAgIAAxkDAAIHbWO6ozF6bEYOgMXAvJ4jhCWz61oJAAJzxzEbeTzZSX5KwmTuXtvaAQADAgADcwADLQQ'
+        'light_sqr': 'AgACAgIAAxkBAAISCWO6vueB0JJvpHoZ1PDEQtMyFNGTAAIOxjEbefLQSVpUkL05R4qYAQADAgADeQADLQQ',
+        'dark_sqr': 'AgACAgIAAxkBAAISCGO6vuLoR_nDqLCO-L3EnsARXvbTAAINxjEbefLQSSAKInAzsc9TAQADAgADeQADLQQ'
     }
 }
