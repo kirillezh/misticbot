@@ -15,6 +15,7 @@ SIREN = os.getenv('SIREN')
 END = os.getenv('END')
 RANDOM = os.getenv('RANDOM')
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
+TIKTOKUSE = str(os.getenv('TIKTOKUSE'))
 
 localisation = {
     "load_v2t": "зачекай... намагаюсь зрозуміти твою солов'їну",

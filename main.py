@@ -69,6 +69,7 @@ async def mdc_all(message: types.Message):
         if(message.content_type in [types.ContentType.TEXT]):
             await function.tiktoktovideo(message)
             await function.youtubetovideo(message)
+            await function.instagramtovideo(message)
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 #Start bot

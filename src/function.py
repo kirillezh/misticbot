@@ -1,4 +1,4 @@
-from src.locales import DRIVER, GMT, URL, localisation
+from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE
 import logging 
 from src.telegramAPI import telegramAPI
 
@@ -87,6 +87,8 @@ class Function:
 
     #search video from url
     def tiktokAPI(self, url):
+        if(TIKTOKUSE == "False"):
+            return self.tiktokAPIaletrnative(url=url)
         from selenium import webdriver
         from selenium.webdriver.common.by import By
         from selenium.webdriver.support.ui import WebDriverWait
@@ -96,8 +98,7 @@ class Function:
         chrome_options.add_argument("--kiosk")
         chrome_options.add_argument('--disable-dev-shm-usage')
         driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
-        driver.get(url) 
-        video = dict()
+        driver.get(url)
         try:
             vid = {
                 "link": WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.TAG_NAME, value='video').get_attribute('src')),
@@ -129,6 +130,8 @@ class Function:
                 "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[2]/div/a[1]').get_attribute('href')),
                 "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[1]/div/div[2]/div[1]').text)
             }
+            if(vid['name'] == "No description"):
+                vid['name']=""
         except:
             vid = ""
             pass
@@ -150,6 +153,7 @@ class Function:
                         caption = file["name"])
             except Exception as e:
                 logging.warning('Error at %s', 'division', exc_info=e)
+                
 
     #url video
     def youtubeapi(self, text):
@@ -172,7 +176,7 @@ class Function:
         except:
                 return None
 
-    def youtubeapiOLD(self, text):
+    '''def youtubeapiOLD(self, text):
         from pytube import YouTube
         yt = YouTube(text)
         print(yt.embed_html)
@@ -184,6 +188,39 @@ class Function:
             return vid
         except:
             return 'error'
+            '''
+    async def instagramtovideo(self, message):
+        url=self.searchurl(message.text)
+        if("instagram.com/reel/" in url):
+            await self.botAPI.sendReaction(message.chat.id, 'upload_video')
+            file = self.instaapi(url)
+            try:
+                if(file != None):
+                    await self.botAPI.sendVideoURL(
+                        toСhat = message.chat.id, 
+                        videoURL = file["link"], 
+                        messageId = message.message_id,
+                        caption = file["name"])
+            except Exception as e:
+                logging.warning('Error at %s', 'division', exc_info=e)
+
+    def instaapi(self, url):
+        logger_ = logging.getLogger("logger")
+        logger_.setLevel(logging.ERROR)
+        from instagrapi import Client, exceptions
+        gram = Client(logger=logger_)
+        gram = Client(logger=logger_
+        )
+        try:
+            fetch_id = gram.media_pk_from_url(url)
+            info = gram.media_info_a1(fetch_id).dict()
+            vid = {
+                    "link": info['video_url'],
+                    "name": info['caption_text']
+            }
+            return vid
+        except exceptions.LoginRequired:
+                return None
 
     #work with screenshot
     def screenshot(self):
