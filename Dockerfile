@@ -29,7 +29,6 @@ RUN apt-get install -y ffmpeg
 #install python dependencies
 COPY requirements.txt requirements.txt 
 RUN pip install --upgrade pip
-RUN pip install -U roughfilter
 RUN pip install -r ./requirements.txt 
 
 # set display port to avoid crash
