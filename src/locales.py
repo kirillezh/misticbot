@@ -16,7 +16,8 @@ END = os.getenv('END')
 RANDOM = os.getenv('RANDOM')
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
 TIKTOKUSE = str(os.getenv('TIKTOKUSE'))
-
+#USERINST=str(os.getenv('USERINST'))
+#PASSINST=str(os.getenv('PASSINST'))
 localisation = {
     "load_v2t": "зачекай... намагаюсь зрозуміти твою солов'їну",
     "fail_v2t": "Ні чорта не зрозумів🤬",
@@ -24,6 +25,7 @@ localisation = {
         "идинахуй": "иди нахуй😡",
         "Путин": "хуйло🤬",
         "Росси": "соси😡",
+        "з*******":"заебался😡",
         "д******": "дрочіла😡",
         "д****": "дохуя😡",
         "б****": "блядь😡",
@@ -35,6 +37,8 @@ localisation = {
         "п******": "підорас😡",
         "п*****": "піздец😡",
         "п****": "пізда😡",
+        "е*******":"ебальник",
+        "б**":"бля",
         "е****": "ебать😡",
         "е***": "ебал😡",
         "Украине": "Украине🇺🇦",
@@ -51,6 +55,7 @@ localisation = {
     "youbot1": "Привіт",
     "youbot2": "Ти бот",
     "start": 'Хай! \n\nТак, я трохи дивний бот, але взагалі я прикольний бот:) \nЯ можу твої тики-токи та ютубчик зі звичайного посилання у видосик конвертувати... Ну тобі ж лінь скачати відео, правда?)\nПовідомляю і хуесошу, коли хуйло хоче запустити в Дніпро ракету, також радію з Вами, коли скасовують тривогу\nЄ ще декілька функцій... Але про них дізнаєтеся пізніше) \n\nУсім любові та миру, крім довбанутих(сосіян)❤️',
+    "map_siren": "Карта оновлюється постійно до відбою",
     "ptn_xuilo": [
         'путін хуйло',
         'Їбав я путіна у сраку!',
@@ -68,13 +73,7 @@ localisation = {
         'Покажіть вже путіну Слідана, а то задовбав захищати...'
         ],
     "img": {
-        'light': 'AgACAgIAAxkBAAISAWO6vp-F6zG2VdiQZqCZ3Gx37F_JAAILxjEbefLQSbfbDTuCvs_8AQADAgADeQADLQQ',
-        'dark': 'AgACAgIAAxkBAAISA2O6vqv__idHf1t8ClEwgf-u3mp7AAIMxjEbefLQSYijIoX7u60VAQADAgADeQADLQQ',
-        'light_sqr': 'AgACAgIAAxkBAAIR_WO6vjrvqpup_nw04n4S_pHGfSVwAAIIxjEbefLQSdgbt0A4Kw6OAQADAgADeQADLQQ',
-        'dark_sqr': 'AgACAgIAAxkBAAIR-2O6vizMq4QpO2JTA8kr9bSAnnnSAAKbwzEb-_jZSWP8wkX-M6YaAQADAgADeQADLQQ'
-    },
-    'error_img':{
-        'light_sqr': 'AgACAgIAAxkBAAISCWO6vueB0JJvpHoZ1PDEQtMyFNGTAAIOxjEbefLQSVpUkL05R4qYAQADAgADeQADLQQ',
-        'dark_sqr': 'AgACAgIAAxkBAAISCGO6vuLoR_nDqLCO-L3EnsARXvbTAAINxjEbefLQSSAKInAzsc9TAQADAgADeQADLQQ'
+        'light': os.getenv('IMGLIGHT'),
+        'dark': os.getenv('IMGDARK')
     }
 }

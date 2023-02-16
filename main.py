@@ -9,7 +9,7 @@ from aiogram.types import ContentType
 import logging, random
 from array import *
 
-from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation, GMT, LEVELLOGGINING
+from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, GMT, localisation, LEVELLOGGINING
 
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
 
@@ -23,17 +23,25 @@ dp = Dispatcher(bot)
 
 from src.function import Function
 from src.telegramAPI import telegramAPI
+from src.session_pickle import SessionHelper
 function = Function(bot)
 botAPI = telegramAPI(bot)
+session = SessionHelper()
 #Siren
 @client.on(events.NewMessage(chats=[CHANNEL]))
 async def siren(message):
     if SIREN in str(message.message) or END in str(message.message):
+        data = session.read_data()
         if SIREN in str(message.message):
-            caption = random.sample(localisation['ptn_xuilo'], k=1)[0]
+            data['siren'] = True
+            caption = random.sample(localisation['ptn_xuilo'], k=1)[0]+"\n"+localisation['map_siren']
+            pinned = True
         elif(END in str(message.message)):
+            data['siren'] = False
             caption = localisation['vidboy']
-        await function.screenshotSend(CHAT_ID, caption)
+            pinned = False
+        session.load_data(data)
+        await function.screenshotSendSiren(CHAT_ID, caption, pinned)
 
 #Send a screenshot
 @dp.message_handler(commands=['screenshot'])
@@ -69,7 +77,7 @@ async def mdc_all(message: types.Message):
         if(message.content_type in [types.ContentType.TEXT]):
             await function.tiktoktovideo(message)
             await function.youtubetovideo(message)
-            await function.instagramtovideo(message)
+            #await function.instagramtovideo(message)
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 #Start bot

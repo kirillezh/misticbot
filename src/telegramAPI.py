@@ -98,6 +98,15 @@ class telegramAPI:
         chat_id = message.chat.id,
         message_id = message.message_id
         )   
+    async def editPhotobyMessageID(self, messageid, chatid, photoId: str, text: str, end: str = " \n"+localisation['end']):
+        from aiogram import types
+        await self.bot.edit_message_media(
+        media = types.InputMediaPhoto(open(photoId, 'rb'),
+            caption = f"{text}{end}",
+            parse_mode="HTML"),
+        chat_id = chatid,
+        message_id = messageid
+        )  
     async def editPhoto(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
         from aiogram import types
         await self.bot.edit_message_media(
@@ -116,4 +125,9 @@ class telegramAPI:
     
     async def downloadFile(self, path: str, name: str):
         return await self.bot.download_file(path, name)
+    
+    async def pinMessage(self, chatid, messageid):
+        return await self.bot.pin_chat_message(chat_id=chatid, message_id=messageid, disable_notification=True)
+    async def unpinMessage(self, chatid, messageid):
+        return await self.bot.unpin_chat_message(chat_id=chatid, message_id=messageid)
     

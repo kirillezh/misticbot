@@ -10,3 +10,4 @@ psycopg2-binary==2.9.3
 yt-dlp==2023.1.2
 instagrapi==1.16.30
 Pillow==9.2.0
+pyppeteer==1.0.2

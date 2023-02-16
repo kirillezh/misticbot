@@ -1,7 +1,8 @@
-from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE
+from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE#, PASSINST, USERINST
 import logging 
 from src.telegramAPI import telegramAPI
-
+from src.session_pickle import SessionHelper
+#from instagrapi import Client, exceptions
 class loggerYT(object):
     def debug(self, msg):
         pass
@@ -15,7 +16,38 @@ class loggerYT(object):
 class Function:
     def __init__(self, bot):
         self.botAPI = telegramAPI(bot)
-    
+        logger_ = logging.getLogger("logger")
+        logger_.setLevel(logging.ERROR)
+        self.session = SessionHelper()
+        #self.gram = Client(logger=logger_)
+        #self.gram.login(username=USERINST, password=PASSINST, relogin=True)
+        #self.gram.relogin()	
+        #media_pk = self.gram.media_pk_from_url('https://www.instagram.com/reel/Cmh-Ec5owm8/?igshid=NTdlMDg3MTY=')
+        #print(self.gram.media_info_a1(media_pk).dict()['video_url'])
+        
+    async def screenshotSendSiren(self, chatid, caption: str, pinned: bool = True):
+        import datetime, asyncio
+        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+        if time_h in range(8, 22):
+            theme = 'light'
+        else:
+            theme = 'dark'
+        msg = await self.botAPI.sendPhotobyID(chatid, localisation['img'][theme], caption)
+        if pinned:
+            await self.botAPI.pinMessage(chatid, msg.message_id)
+        while True:
+            try:
+                await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
+            except:
+                pass
+            data = self.session.read_data()
+            if data['siren'] is False:
+                if pinned:
+                    await self.botAPI.unpinMessage(chatid, msg.message_id)
+                return 0
+            await asyncio.sleep(8)
+
+
     async def screenshotSend(self, chatID: int, caption:str, message_id: int = None):
         import datetime
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
@@ -28,7 +60,7 @@ class Function:
         except:
             msg = await self.botAPI.sendPhotobyID(chatID, localisation['img'][theme], caption)
         await self.botAPI.sendReaction(chatID, 'upload_photo')
-        return await self.botAPI.editPhoto(msg, self.screenshot(), caption)
+        return await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
     
 
     #voicy2text
@@ -189,7 +221,7 @@ class Function:
         except:
             return 'error'
             '''
-    async def instagramtovideo(self, message):
+    '''async def instagramtovideo(self, message):
         url=self.searchurl(message.text)
         if("instagram.com/reel/" in url):
             await self.botAPI.sendReaction(message.chat.id, 'upload_video')
@@ -205,15 +237,9 @@ class Function:
                 logging.warning('Error at %s', 'division', exc_info=e)
 
     def instaapi(self, url):
-        logger_ = logging.getLogger("logger")
-        logger_.setLevel(logging.ERROR)
-        from instagrapi import Client, exceptions
-        gram = Client(logger=logger_)
-        gram = Client(logger=logger_
-        )
         try:
-            fetch_id = gram.media_pk_from_url(url)
-            info = gram.media_info_a1(fetch_id).dict()
+            fetch_id = self.gram.media_pk_from_url(url)
+            info = self.gram.media_info_a1(fetch_id).dict()
             vid = {
                     "link": info['video_url'],
                     "name": info['caption_text']
@@ -221,9 +247,36 @@ class Function:
             return vid
         except exceptions.LoginRequired:
                 return None
+'''
+    async def screenshot(self):
+        import asyncio, datetime
+        from pyppeteer import launch
+        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+        if time_h in range(8, 22):
+            theme = 'light'
+        else:
+            theme = 'black-preset'
+        try:
+            browser = await launch(defaultViewport={
+                "width": 1600,
+                "height": 1200,
+                "isMobile": False,
+                "hasTouch":False,
+                "isLandscape":False
+            }, logLevel = logging.WARNING)
+            page = await browser.newPage()
+            await page.goto('https://alerts.in.ua/')
+            await page.evaluate("document.querySelector('html').className = '"+theme+" menu-hidden'")
+            await asyncio.sleep(3)
+            await page.screenshot({'path': 'screenshot.png'})
+            await browser.close()
+            await browser.process.kill()
+        except:
+            pass
+        return 'screenshot.png'
 
-    #work with screenshot
-    def screenshot(self):
+    ''' #work with screenshot
+    def screenshot_alt(self):
         import datetime
         from selenium import webdriver
         from selenium.webdriver.common.by import By
@@ -247,7 +300,7 @@ class Function:
         driver.save_screenshot("screenshot.png")
         driver.quit()
         return 'screenshot.png'
-
+'''
     #logs to file
     async def logs(self, message):
         import datetime
