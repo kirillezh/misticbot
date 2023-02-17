@@ -1,7 +1,7 @@
 FROM python:3.9-slim
 
 RUN apt-get update 
-RUN apt-get -y install wget curl gnupg gnupg2 gnupg1 libxss1 fonts-wqy-zenhei
+RUN apt-get -y install wget curl gnupg gnupg2 gnupg1
 
 # Adding trusting keys to apt for repositories
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
