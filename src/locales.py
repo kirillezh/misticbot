@@ -74,6 +74,8 @@ localisation = {
         ],
     "img": {
         'light': os.getenv('IMGLIGHT'),
-        'dark': os.getenv('IMGDARK')
+        'dark': os.getenv('IMGDARK'),
+        'light_sqr': os.getenv('IMGLIGHTSQR'),
+        'dark_sqr': os.getenv('IMGDARKSQR')
     }
 }

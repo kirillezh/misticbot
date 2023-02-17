@@ -4,14 +4,14 @@
     "link": "https://t.me/chat_ezh_bot",
     "commands": {
         "start": "Починаємо...",
-        "info": "Шайтан-машина"
+        "info": "Шайтан-машин
     },
     "functions":[
         "Надсилання повідомлень про тривогу і відбій з картою тривог",
         "Конвертування Youtube та TikTok посилань на відео",
         "Конвертування ваших голосових та відео-повідомлень у текст"
     ],
-    "version": "3.8.1(1)",
+    "version": "3.8.2",
     "projectName": "misticbot",
     "ChangeLog": "https://headwayapp.co/misticbot-changes",
     "GitHub": "https://github.com/kirillezh/misticbot"
