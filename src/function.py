@@ -263,16 +263,15 @@ class Function:
                 "isMobile": False,
                 "hasTouch":False,
                 "isLandscape":False
-            }, logLevel = logging.WARNING)
+            }, logLevel = logging.WARNING, options={'args': ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process', '--no-zygote']})
             page = await browser.newPage()
             await page.goto('https://alerts.in.ua/')
             await page.evaluate("document.querySelector('html').className = '"+theme+" menu-hidden'")
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
             await page.screenshot({'path': 'screenshot.png'})
             await browser.close()
-            await browser.process.kill()
-        except:
-            pass
+        except Exception as e:
+                logging.warning('Error at %s', 'division', exc_info=e)
         return 'screenshot.png'
 
     ''' #work with screenshot
