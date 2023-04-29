@@ -1,4 +1,4 @@
-from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE#, PASSINST, USERINST
+from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE
 import logging 
 from src.telegramAPI import telegramAPI
 from src.session_pickle import SessionHelper
@@ -19,12 +19,39 @@ class Function:
         logger_ = logging.getLogger("logger")
         logger_.setLevel(logging.ERROR)
         self.session = SessionHelper()
-        #self.gram = Client(logger=logger_)
-        #self.gram.login(username=USERINST, password=PASSINST, relogin=True)
-        #self.gram.relogin()	
-        #media_pk = self.gram.media_pk_from_url('https://www.instagram.com/reel/Cmh-Ec5owm8/?igshid=NTdlMDg3MTY=')
-        #print(self.gram.media_info_a1(media_pk).dict()['video_url'])
-        
+    
+    async def sendPhotoFromSeesion(self, chatid: int, photoid : str, caption: str = "", messageId: str = None):
+        photo =  self.session.read_photo(photoid)
+        if(photo == ''):
+            mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
+            self.session.update_photo(photoid, self.idMaxPhoto(mes))
+        else:
+            try:
+                mes = await self.botAPI.sendPhotobyID(chatid,photo, caption, messageId)
+            except:
+                mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
+                self.session.update_photo(photoid, self.idMaxPhoto(mes))
+        return mes
+    
+    async def updatePhotoFromSeesion(self, message, photoid : str, caption: str = ""):
+        photo =  self.session.read_photo(photoid)
+        if(photo == ''):
+            mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
+            self.session.update_photo(photoid, self.idMaxPhoto(mes))
+        else:
+            try:
+                mes = await self.botAPI.editPhotobyID(message,photo, caption)
+            except:
+                mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
+                self.session.update_photo(photoid, self.idMaxPhoto(mes))
+        return 
+    
+    def idMaxPhoto(self,message):
+        photo_sizes = message.photo
+        photo_sizes.sort(key=lambda photo_size: photo_size.width, reverse=True)
+        photo_id = photo_sizes[0].file_id
+        return photo_id
+    
     async def screenshotSendSiren(self, chatid, caption: str, pinned: bool = True):
         import datetime, asyncio
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
@@ -52,15 +79,22 @@ class Function:
         import datetime
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
         if time_h in range(8, 22):
-            theme = 'light'
+            theme = 'Light'
         else:
-            theme = 'dark'
+            theme = 'Dark'
         try:
-            msg = await self.botAPI.sendPhotobyID(chatID, localisation['img'][theme], caption, message_id)
+            msg = await self.sendPhotoFromSeesion(chatID, 'loadMaps'+theme,caption, message_id)
         except:
-            msg = await self.botAPI.sendPhotobyID(chatID, localisation['img'][theme], caption)
+            msg = await self.sendPhotoFromSeesion(chatID, 'loadMaps'+theme,caption)
         await self.botAPI.sendReaction(chatID, 'upload_photo')
-        return await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
+        try:
+            return await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
+        except:
+            return await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+theme,
+                        caption = caption
+                    )
     
 
     #voicy2text
@@ -99,17 +133,24 @@ class Function:
             import datetime
             time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
             if time_h in range(8, 22):
-                theme = 'light_sqr'
+                theme = 'Light'
             else:
-                theme = 'dark_sqr'
+                theme = 'Dark'
             try:
-                msg = await self.botAPI.sendPhotobyID(
-                toСhat = message.chat.id, 
-                photoId = localisation['img'][theme], 
-                messageId = message.message_id)
+                msg = await self.sendPhotoFromSeesion(
+                    chatid=message.chat.id,
+                    photoid= 'load'+theme,
+                    messageId = message.message_id
+                )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
                 video_data = self.tiktokAPI(url)
-                await self.botAPI.editVideo(
+                if video_data=="" :
+                    await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+theme
+                    )
+                else:
+                    await self.botAPI.editVideo(
                     message= msg,
                     videoId = video_data["link"], 
                     text= video_data["name"])
@@ -133,7 +174,7 @@ class Function:
         driver.get(url)
         try:
             vid = {
-                "link": WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(by=By.TAG_NAME, value='video').get_attribute('src')),
+                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div/div/div/video').get_attribute('href')),
                 "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[3]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div').text)
             }
         except:
@@ -159,8 +200,8 @@ class Function:
         urlField.send_keys(Keys.ENTER)
         try:
             vid = {
-                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[2]/div/a[1]').get_attribute('href')),
-                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div/div[1]/div/div[2]/div[1]').text)
+                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[2]/a[1]').get_attribute('href')),
+                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[1]/div/div').text)
             }
             if(vid['name'] == "No description"):
                 vid['name']=""
@@ -208,46 +249,6 @@ class Function:
         except:
                 return None
 
-    '''def youtubeapiOLD(self, text):
-        from pytube import YouTube
-        yt = YouTube(text)
-        print(yt.embed_html)
-        try:
-            vid = {
-                "link": yt.streams[1].url,
-                "name": yt.title
-            }
-            return vid
-        except:
-            return 'error'
-            '''
-    '''async def instagramtovideo(self, message):
-        url=self.searchurl(message.text)
-        if("instagram.com/reel/" in url):
-            await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-            file = self.instaapi(url)
-            try:
-                if(file != None):
-                    await self.botAPI.sendVideoURL(
-                        toСhat = message.chat.id, 
-                        videoURL = file["link"], 
-                        messageId = message.message_id,
-                        caption = file["name"])
-            except Exception as e:
-                logging.warning('Error at %s', 'division', exc_info=e)
-
-    def instaapi(self, url):
-        try:
-            fetch_id = self.gram.media_pk_from_url(url)
-            info = self.gram.media_info_a1(fetch_id).dict()
-            vid = {
-                    "link": info['video_url'],
-                    "name": info['caption_text']
-            }
-            return vid
-        except exceptions.LoginRequired:
-                return None
-'''
     async def screenshot(self):
         import asyncio, datetime
         from pyppeteer import launch
@@ -265,7 +266,7 @@ class Function:
                 "isLandscape":False
             }, logLevel = logging.WARNING, options={'args': ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process', '--no-zygote']})
             page = await browser.newPage()
-            await page.goto('https://alerts.in.ua/')
+            await page.goto(URL)
             await page.evaluate("document.querySelector('html').className = '"+theme+" menu-hidden'")
             await asyncio.sleep(5)
             await page.screenshot({'path': 'screenshot.png'})
@@ -274,32 +275,6 @@ class Function:
                 logging.warning('Error at %s', 'division', exc_info=e)
         return 'screenshot.png'
 
-    ''' #work with screenshot
-    def screenshot_alt(self):
-        import datetime
-        from selenium import webdriver
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        driver = webdriver.Chrome(DRIVER, chrome_options=chrome_options)
-        driver.set_window_size(1600, 1200)
-        driver.get(URL)
-        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-        if time_h in range(8, 22):
-            theme = 'light'
-        else:
-            theme = 'black-preset'
-        try:
-            WebDriverWait(driver, timeout=10).until(lambda d: d.execute_script(f"arguments[0].setAttribute('class','{theme} menu-hidden')", driver.find_element(By.TAG_NAME, 'html')))
-        except:
-            pass
-        driver.save_screenshot("screenshot.png")
-        driver.quit()
-        return 'screenshot.png'
-'''
     #logs to file
     async def logs(self, message):
         import datetime

@@ -91,7 +91,7 @@ class telegramAPI:
         )
     async def editPhotobyID(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
         from aiogram import types
-        await self.bot.edit_message_media(
+        return await self.bot.edit_message_media(
         media = types.InputMediaPhoto(photoId,
             caption = f"{text}{end}",
             parse_mode="HTML"),
@@ -100,7 +100,7 @@ class telegramAPI:
         )   
     async def editPhotobyMessageID(self, messageid, chatid, photoId: str, text: str, end: str = " \n"+localisation['end']):
         from aiogram import types
-        await self.bot.edit_message_media(
+        return await self.bot.edit_message_media(
         media = types.InputMediaPhoto(open(photoId, 'rb'),
             caption = f"{text}{end}",
             parse_mode="HTML"),
@@ -109,7 +109,7 @@ class telegramAPI:
         )  
     async def editPhoto(self, message, photoId: str, text: str, end: str = " \n"+localisation['end']):
         from aiogram import types
-        await self.bot.edit_message_media(
+        return await self.bot.edit_message_media(
         media = types.InputMediaPhoto(open(photoId, 'rb'),
             caption = f"{text}{end}",
             parse_mode="HTML"),
