@@ -224,10 +224,12 @@ class Function:
         try:
             vid = {
                 "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[2]/a[1]').get_attribute('href')),
-                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[1]/div/div').text)
+                "name": ""
             }
-            if(vid['name'] == "No description"):
-                vid['name']=""
+            try:
+                vid['name'] = WebDriverWait(driver, timeout=5).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[1]/div/div').text)
+            except:
+                pass
         except:
             vid = ""
             pass
