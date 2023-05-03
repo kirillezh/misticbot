@@ -34,8 +34,9 @@ class APIScreenshot:
         import asyncio
         from src.locales import URL
         page = await self.browser.newPage()
+        self.darkmode()
         await page.goto(URL)
-        await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.darkmode() else 'light') +" menu-hidden'")
+        await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.mode else 'light') +" menu-hidden'")
         await asyncio.sleep(3)
         await page.screenshot({'path': 'screenshot.png'})
         await page.close()
