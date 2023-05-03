@@ -41,7 +41,7 @@ async def siren(message):
             caption = localisation['vidboy']
             pinned = False
         session.load_data(data)
-        await function.screenshotSendSiren(CHAT_ID, caption, pinned)
+        await function.screenshotSendSiren(CHAT_ID, caption, data['siren'], pinned)
 
 #Send a screenshot
 @dp.message_handler(commands=['screenshot'])
@@ -77,7 +77,6 @@ async def mdc_all(message: types.Message):
         if(message.content_type in [types.ContentType.TEXT]):
             await function.tiktoktovideo(message)
             await function.youtubetovideo(message)
-            #await function.instagramtovideo(message)
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 #Start bot

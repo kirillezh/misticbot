@@ -2,7 +2,8 @@ from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE
 import logging 
 from src.telegramAPI import telegramAPI
 from src.session_pickle import SessionHelper
-#from instagrapi import Client, exceptions
+from src.APIScreenshot import APIScreenshot
+
 class loggerYT(object):
     def debug(self, msg):
         pass
@@ -15,11 +16,12 @@ class loggerYT(object):
 
 class Function:
     def __init__(self, bot):
+        self.screenshotAPI = APIScreenshot()
         self.botAPI = telegramAPI(bot)
         logger_ = logging.getLogger("logger")
         logger_.setLevel(logging.ERROR)
         self.session = SessionHelper()
-    
+        
     async def sendPhotoFromSeesion(self, chatid: int, photoid : str, caption: str = "", messageId: str = None):
         photo =  self.session.read_photo(photoid)
         if(photo == ''):
@@ -52,25 +54,40 @@ class Function:
         photo_id = photo_sizes[0].file_id
         return photo_id
     
-    async def screenshotSendSiren(self, chatid, caption: str, pinned: bool = True):
+    async def screenshotSendSiren(self, chatid, caption: str, siren: bool, pinned: bool = True):
         import datetime, asyncio
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
         if time_h in range(8, 22):
-            theme = 'light'
+            theme = 'Light'
         else:
-            theme = 'dark'
-        msg = await self.botAPI.sendPhotobyID(chatid, localisation['img'][theme], caption)
+            theme = 'Dark'
+        if siren:
+            photoId= 'siren'+theme
+        else:
+            photoId= 'clean'+theme
+        msg = await self.sendPhotoFromSeesion(
+                    chatid=chatid,
+                    photoid= photoId,
+                    caption = caption
+                )
         if pinned:
             await self.botAPI.pinMessage(chatid, msg.message_id)
         while True:
             try:
-                await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
+                await self.botAPI.editPhoto(msg, await self.screenshotAPI.screenshot_alert(), caption)
+            except:
+                pass
+            import os
+            try:
+                os.remove('screenshot.png')
             except:
                 pass
             data = self.session.read_data()
             if data['siren'] is False:
-                if pinned:
+                try:
                     await self.botAPI.unpinMessage(chatid, msg.message_id)
+                except:
+                    pass
                 return 0
             await asyncio.sleep(8)
 
@@ -88,13 +105,15 @@ class Function:
             msg = await self.sendPhotoFromSeesion(chatID, 'loadMaps'+theme,caption)
         await self.botAPI.sendReaction(chatID, 'upload_photo')
         try:
-            return await self.botAPI.editPhoto(msg, await self.screenshot(), caption)
+            msg_new = await self.botAPI.editPhoto(msg, await self.screenshotAPI.screenshot_alert(), caption)
         except:
-            return await self.updatePhotoFromSeesion(
-                        message = msg,
-                        photoid= 'error'+theme,
-                        caption = caption
-                    )
+            msg_new = await self.updatePhotoFromSeesion(message = msg,photoid= 'error'+theme,caption = caption)
+        import os
+        try:
+            os.remove('screenshot.png')
+        except:
+            pass
+        return msg_new
     
 
     #voicy2text
@@ -155,6 +174,10 @@ class Function:
                     videoId = video_data["link"], 
                     text= video_data["name"])
             except Exception as e:
+                await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+theme
+                    )
                 logging.warning('Error at %s', 'division', exc_info=e)
             
 
@@ -249,36 +272,10 @@ class Function:
         except:
                 return None
 
-    async def screenshot(self):
-        import asyncio, datetime
-        from pyppeteer import launch
-        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-        if time_h in range(8, 22):
-            theme = 'light'
-        else:
-            theme = 'black-preset'
-        try:
-            browser = await launch(defaultViewport={
-                "width": 1600,
-                "height": 1200,
-                "isMobile": False,
-                "hasTouch":False,
-                "isLandscape":False
-            }, logLevel = logging.WARNING, options={'args': ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process', '--no-zygote']})
-            page = await browser.newPage()
-            await page.goto(URL)
-            await page.evaluate("document.querySelector('html').className = '"+theme+" menu-hidden'")
-            await asyncio.sleep(5)
-            await page.screenshot({'path': 'screenshot.png'})
-            await browser.close()
-        except Exception as e:
-                logging.warning('Error at %s', 'division', exc_info=e)
-        return 'screenshot.png'
-
     #logs to file
     async def logs(self, message):
         import datetime
-        file = open("logs.txt", "a")
+        file = open("logs/logs_"+datetime.datetime.now().strftime("%d-%m-%Y")+".txt", "a+")
         now = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        file.write(f"{message.from_user.id}-{message.from_user.full_name}-{now}-{message}\n")
+        file.write(f"{message.chat.id}${message.from_user.id}${message.from_user.full_name}${now}${message}\n")
         file.close()

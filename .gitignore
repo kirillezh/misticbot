@@ -4,6 +4,7 @@ misticbot.code-workspace
 session.*
 __pycache__
 .png
+logs_*
 logs.txt
 trash
 .DS_Store

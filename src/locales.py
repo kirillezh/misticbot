@@ -72,11 +72,5 @@ localisation = {
         'путін на аві, а мати у канаві',
         'путіна пора відправити в дурку',
         'Покажіть вже путіну Слідана, а то задовбав захищати...'
-        ],
-    "img": {
-        'light': os.getenv('IMGLIGHT'),
-        'dark': os.getenv('IMGDARK'),
-        'light_sqr': os.getenv('IMGLIGHTSQR'),
-        'dark_sqr': os.getenv('IMGDARKSQR')
-    }
+        ]
 }

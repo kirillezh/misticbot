@@ -10,7 +10,11 @@ data = {
         "loadDark": '',
         "loadLight":'',
         "errorDark":'',
-        "errorLight": ''
+        "errorLight": '',
+        "sirenDark": '',
+        "sirenLight":'',
+        "cleanDark":'',
+        "cleanLight": ''
     }
 }
 
