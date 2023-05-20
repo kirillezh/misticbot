@@ -3,19 +3,33 @@ from dotenv import load_dotenv
 
 #import .env file
 load_dotenv()
+INSTA_LOGIN = os.getenv('INSTA_LOGIN')
+INSTA_PASS = os.getenv('INSTA_PASS')
+
 API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
+
 CHAT_ID = int(os.getenv('CHAT_ID'))
+
 API_TOKEN = os.getenv('API_TOKEN')
+
 DRIVER = os.getenv('DRIVER')
+
 CHANNEL = os.getenv('CHANNEL')
+
 URL = os.getenv('URL')
+
 GMT = int(os.getenv('GMT'))
+
 SIREN = os.getenv('SIREN')
 END = os.getenv('END')
+
 RANDOM = os.getenv('RANDOM')
+
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
+
 TIKTOKUSE = str(os.getenv('TIKTOKUSE'))
+
 localisation = {
     "load_v2t": "зачекай... намагаюсь зрозуміти твою солов'їну",
     "fail_v2t": "Ні чорта не зрозумів🤬",

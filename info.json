@@ -8,10 +8,10 @@
     },
     "functions":[
         "Надсилання повідомлень про тривогу і відбій з картою тривог",
-        "Конвертування Youtube та TikTok посилань на відео",
+        "Конвертування Youtube, TikTok, Instagram(Reels), Twitter посилань на відео",
         "Конвертування ваших голосових та відео-повідомлень у текст"
     ],
-    "version": "3.9.5(2)",
+    "version": "3.10",
     "projectName": "misticbot",
     "ChangeLog": "https://headwayapp.co/misticbot-changes",
     "GitHub": "https://github.com/kirillezh/misticbot"

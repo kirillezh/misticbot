@@ -1,6 +1,8 @@
-from src.locales import DRIVER, GMT, URL, localisation, TIKTOKUSE
+from src.locales import DRIVER, GMT, localisation, TIKTOKUSE, INSTA_LOGIN, INSTA_PASS
 import logging 
 from src.telegramAPI import telegramAPI
+from src.instaAPI import instaAPI
+from src.twitterAPI import twitterAPI
 from src.session_pickle import SessionHelper
 from src.APIScreenshot import APIScreenshot
 
@@ -18,6 +20,8 @@ class Function:
     def __init__(self, bot):
         self.screenshotAPI = APIScreenshot()
         self.botAPI = telegramAPI(bot)
+        self.insta = instaAPI(INSTA_LOGIN, INSTA_PASS)
+        self.twitter = twitterAPI()
         logger_ = logging.getLogger("logger")
         logger_.setLevel(logging.ERROR)
         self.session = SessionHelper()
@@ -273,6 +277,66 @@ class Function:
                 return vid
         except:
                 return None
+
+    #checking and sending insta-video
+    async def instatovideo(self, message):
+        url=self.searchurl(message.text)
+        if("instagram.com/" in url):
+            import datetime
+            time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+            if time_h in range(8, 22):
+                theme = 'Light'
+            else:
+                theme = 'Dark'
+            
+            try:
+                msg = await self.sendPhotoFromSeesion(
+                    chatid=message.chat.id,
+                    photoid= 'load'+theme,
+                    messageId = message.message_id
+                )
+                await self.botAPI.sendReaction(message.chat.id, 'upload_video')
+                info = self.insta.download_video(url)
+                await self.botAPI.editVideo(
+                    message= msg,
+                    videoId = info["link"], 
+                    text= info["name"])
+            except Exception as e:
+                await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+theme
+                    )
+                logging.warning('Error at %s', 'division', exc_info=e)
+    
+    #checking and sending twitter-video
+    async def twittertovideo(self, message):
+        url=self.searchurl(message.text)
+        if("twitter.com/" in url):
+            import datetime
+            time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+            if time_h in range(8, 22):
+                theme = 'Light'
+            else:
+                theme = 'Dark'
+            
+            try:
+                msg = await self.sendPhotoFromSeesion(
+                    chatid=message.chat.id,
+                    photoid= 'load'+theme,
+                    messageId = message.message_id
+                )
+                await self.botAPI.sendReaction(message.chat.id, 'upload_video')
+                info = self.twitter.getvideo(url)
+                await self.botAPI.editVideo(
+                    message= msg,
+                    videoId = info["link"], 
+                    text= info["name"])
+            except Exception as e:
+                await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+theme
+                    )
+                logging.warning('Error at %s', 'division', exc_info=e)
 
     #logs to file
     async def logs(self, message):

@@ -1,6 +1,5 @@
 #import telethon
 from telethon import TelegramClient, events
-from telethon.tl.types import Message
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types.input_media import *
@@ -9,7 +8,7 @@ from aiogram.types import ContentType
 import logging, random
 from array import *
 
-from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, GMT, localisation, LEVELLOGGINING
+from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, SIREN, END, localisation, LEVELLOGGINING
 
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
 
@@ -76,6 +75,8 @@ async def mdc_all(message: types.Message):
             await function.voicy2text(message)
         if(message.content_type in [types.ContentType.TEXT]):
             await function.tiktoktovideo(message)
+            await function.instatovideo(message)
+            await function.twittertovideo(message)
             await function.youtubetovideo(message)
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
