@@ -62,6 +62,12 @@ async def alert(message: types.Message):
 async def info(message: types.Message):
     await botAPI.reply(message, open("info.json", "r").read(), end="")
 
+
+#Grade
+@dp.message_handler(commands=['yourgrades'])
+async def yourgrades(message: types.Message):
+    await botAPI.reply(message, localisation['yourgrades'], end="")
+
 #Message distribution center
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def mdc_all(message: types.Message):
