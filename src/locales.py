@@ -29,6 +29,7 @@ RANDOM = os.getenv('RANDOM')
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
 
 TIKTOKUSE = str(os.getenv('TIKTOKUSE'))
+INSTAUSE = str(os.getenv('INSTAUSE'))
 
 localisation = {
     "load_v2t": "зачекай... намагаюсь зрозуміти твою солов'їну",

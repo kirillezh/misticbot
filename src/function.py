@@ -1,4 +1,4 @@
-from src.locales import DRIVER, GMT, localisation, TIKTOKUSE, INSTA_LOGIN, INSTA_PASS
+from src.locales import DRIVER, GMT, localisation, TIKTOKUSE, INSTAUSE, INSTA_LOGIN, INSTA_PASS
 import logging 
 from src.telegramAPI import telegramAPI
 from src.instaAPI import instaAPI
@@ -232,6 +232,8 @@ class Function:
             }
             try:
                 vid['name'] = WebDriverWait(driver, timeout=5).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[1]/div/div').text)
+                if(vid['name'] == "No description"):
+                    vid['name'] = ""
             except:
                 pass
         except:
@@ -281,7 +283,7 @@ class Function:
     #checking and sending insta-video
     async def instatovideo(self, message):
         url=self.searchurl(message.text)
-        if("instagram.com/" in url):
+        if("instagram.com/reel/" in url):
             import datetime
             time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
             if time_h in range(8, 22):
@@ -296,7 +298,13 @@ class Function:
                     messageId = message.message_id
                 )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-                info = self.insta.download_video(url)
+                if(INSTAUSE == "False"):
+                    info = self.instaAPI(url=url)
+                else: 
+                    try:
+                        info = self.insta.download_video(url)
+                    except:
+                        info = self.instaAPI(url=url)
                 await self.botAPI.editVideo(
                     message= msg,
                     videoId = info["link"], 
@@ -308,6 +316,34 @@ class Function:
                     )
                 logging.warning('Error at %s', 'division', exc_info=e)
     
+    #search video from url
+    def instaAPI(self, url):
+        from selenium import webdriver
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.common.keys import Keys
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument("--kiosk")
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        #chrome_options.add_argument('User-Agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"')
+        driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
+        driver.get("https://saveinsta.app/en1")
+        urlField = driver.find_element_by_id("s_input")
+        urlField.send_keys(url)
+        urlField.send_keys(Keys.ENTER)
+        try:
+            vid = {
+                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[1]/div[1]/div/div/div[3]/ul/li[1]/div/div[2]/a').get_attribute('href')),
+                "name": ""
+            }
+        except:
+            vid = ""
+            pass
+        driver.quit()
+        return vid
+
     #checking and sending twitter-video
     async def twittertovideo(self, message):
         url=self.searchurl(message.text)
