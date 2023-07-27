@@ -12,3 +12,4 @@ instagrapi==1.16.30
 Pillow==9.2.0
 pyppeteer==1.0.2
 instaloader==4.9.6
+httpx==0.24.1
