@@ -23,7 +23,7 @@ class APIScreenshot:
         import datetime
         from src.locales import GMT
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-        if time_h in range(8, 22):
+        if time_h in range(7, 20):
             self.mode = False
         else:
             self.mode = True
@@ -35,8 +35,21 @@ class APIScreenshot:
         from src.locales import URL
         page = await self.browser.newPage()
         self.darkmode()
+        await page.evaluateOnNewDocument (
+            '''() => {
+        localStorage.setItem('showAlertDurations', true);
+        localStorage.setItem('preset', 'black');
+        localStorage.setItem('showThreats', true);
+        localStorage.setItem('showRivers', true);
+        localStorage.setItem('showWarnings', true);
+        localStorage.setItem('durationTimeFormat', 'h. m.');
+        localStorage.setItem('showMapIcons', true);
+        localStorage.setItem('showNeighbourRegions', true);
+        localStorage.setItem('showUnofficialArtillery', true);
+        }'''
+        )
         await page.goto(URL)
-        await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.mode else 'light') +" menu-hidden'")
+        await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.mode else 'black-preset light') +" menu-hidden'")
         await asyncio.sleep(3)
         await page.screenshot({'path': 'screenshot.png'})
         await page.close()

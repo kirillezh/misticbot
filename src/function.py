@@ -1,11 +1,10 @@
 from src.locales import DRIVER, GMT, localisation, TIKTOKUSE, INSTAUSE, INSTA_LOGIN, INSTA_PASS
 import logging 
 from src.telegramAPI import telegramAPI
-from src.instaAPI import instaAPI
 from src.twitterAPI import twitterAPI
 from src.session_pickle import SessionHelper
 from src.APIScreenshot import APIScreenshot
-
+from src.tiktokAPI import snaptik
 class loggerYT(object):
     def debug(self, msg):
         pass
@@ -20,7 +19,6 @@ class Function:
     def __init__(self, bot):
         self.screenshotAPI = APIScreenshot()
         self.botAPI = telegramAPI(bot)
-        self.insta = instaAPI(INSTA_LOGIN, INSTA_PASS)
         self.twitter = twitterAPI()
         logger_ = logging.getLogger("logger")
         logger_.setLevel(logging.ERROR)
@@ -99,7 +97,7 @@ class Function:
     async def screenshotSend(self, chatID: int, caption:str, message_id: int = None):
         import datetime
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-        if time_h in range(8, 22):
+        if time_h in range(7, 20):
             theme = 'Light'
         else:
             theme = 'Dark'
@@ -166,8 +164,8 @@ class Function:
                     messageId = message.message_id
                 )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-                video_data = self.tiktokAPI(url)
-                if video_data=="" :
+                video_data = await snaptik(url)
+                if video_data == "":
                     await self.updatePhotoFromSeesion(
                         message = msg,
                         photoid= 'error'+theme
@@ -185,62 +183,6 @@ class Function:
                 logging.warning('Error at %s', 'division', exc_info=e)
             
 
-    #search video from url
-    def tiktokAPI(self, url):
-        if(TIKTOKUSE == "False"):
-            return self.tiktokAPIaletrnative(url=url)
-        from selenium import webdriver
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument("--kiosk")
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
-        driver.get(url)
-        try:
-            vid = {
-                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div/div/div/video').get_attribute('href')),
-                "name": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/div[2]/div[3]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div').text)
-            }
-        except:
-            vid = self.tiktokAPIaletrnative(url=url)
-        driver.quit()
-        return vid
-    
-    #search video from url
-    def tiktokAPIaletrnative(self, url):
-        from selenium import webdriver
-        from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.common.keys import Keys
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument("--kiosk")
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        driver = webdriver.Chrome(executable_path=DRIVER,options=chrome_options)
-        driver.get("https://snaptik.app/en")
-        urlField = driver.find_element_by_id("url")
-        urlField.send_keys(url)
-        urlField.send_keys(Keys.ENTER)
-        try:
-            vid = {
-                "link": WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[2]/a[1]').get_attribute('href')),
-                "name": ""
-            }
-            try:
-                vid['name'] = WebDriverWait(driver, timeout=5).until(lambda d: d.find_element(by=By.XPATH, value='/html/body/section/div/div[2]/div/div[1]/div/div').text)
-                if(vid['name'] == "No description"):
-                    vid['name'] = ""
-            except:
-                pass
-        except:
-            vid = ""
-            pass
-        driver.quit()
-        return vid
 
     #checking and sending youtube-video
     async def youtubetovideo(self, message):
@@ -298,13 +240,7 @@ class Function:
                     messageId = message.message_id
                 )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-                if(INSTAUSE == "False"):
-                    info = self.instaAPI(url=url)
-                else: 
-                    try:
-                        info = self.insta.download_video(url)
-                    except:
-                        info = self.instaAPI(url=url)
+                info = self.instaAPI(url=url)
                 await self.botAPI.editVideo(
                     message= msg,
                     videoId = info["link"], 
