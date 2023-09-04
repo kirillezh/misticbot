@@ -24,7 +24,7 @@ class Converter:
 
     def localisation(self, text):
         from src.locales import localisation
-        for i, j in localisation['local_v2t'].items():
+        for i, j in localisation['ua']['local_v2t'].items():
             text = text.replace(i, j)
         return text
 

@@ -2,20 +2,7 @@ import pickle
 
 #basic data in session
 data = {
-    'time': '2016-Aug-04 08:24:38',
-    "siren": False,
-    "photo_id": {
-        "loadMapsDark": '',
-        "loadMapsLight": '',
-        "loadDark": '',
-        "loadLight":'',
-        "errorDark":'',
-        "errorLight": '',
-        "sirenDark": '',
-        "sirenLight":'',
-        "cleanDark":'',
-        "cleanLight": ''
-    }
+    "siren": False
 }
 
 #new SessionHelper
@@ -49,12 +36,3 @@ class SessionHelper:
         data = self.read_data()
         data[id] = newData
         self.load_data(data)
-
-    def update_photo(self, id: str, newData:str):
-        data = self.read_data()
-        data['photo_id'][id] = newData
-        self.load_data(data)
-
-    def read_photo(self, id:str):
-        data =  self.read_data()
-        return data['photo_id'][id]

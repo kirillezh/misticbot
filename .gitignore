@@ -11,3 +11,5 @@ trash
 screenshot.png
 data.pickle
 instauser
+*.db
+*.sqlite

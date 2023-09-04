@@ -1,10 +1,12 @@
-from src.locales import DRIVER, GMT, localisation, TIKTOKUSE, INSTAUSE, INSTA_LOGIN, INSTA_PASS
-import logging 
+from src.locales import DRIVER, GMT, localisation, cities, SIREN, ENDSIREN
+import logging, json
 from src.telegramAPI import telegramAPI
 from src.twitterAPI import twitterAPI
 from src.session_pickle import SessionHelper
 from src.APIScreenshot import APIScreenshot
 from src.tiktokAPI import snaptik
+from src.dbHelper import dbHelper
+
 class loggerYT(object):
     def debug(self, msg):
         pass
@@ -16,38 +18,165 @@ class loggerYT(object):
         print(msg)
 
 class Function:
-    def __init__(self, bot):
+    def __init__(self, bot, database):
         self.screenshotAPI = APIScreenshot()
         self.botAPI = telegramAPI(bot)
         self.twitter = twitterAPI()
         logger_ = logging.getLogger("logger")
         logger_.setLevel(logging.ERROR)
         self.session = SessionHelper()
+        self.database = database
+
+    def checkLocalInfo(self, var):
+        f = json.load(open('info.json'))
+        return f[var]
+
+    async def on_startup(self):
+        dbVersion = self.database.infoBot()[2]
+        version = self.checkLocalInfo('version')
+        versionTo = self.checkLocalInfo('upgrade')
+
+        if(float(dbVersion) < float(version)):
+            self.database.updateInfoBot(version)
+            if(float(dbVersion) < float(versionTo['versionTo'])):
+                groups = self.database.allGroup()
+                for group in groups:
+                    #try:
+                        await self.botAPI.sendMessage(group[0], versionTo['updateInfo'][group[5]], lang=group[5], end="")
+                    #except:
+                    #    pass
         
+    async def checkStatus(self, userID: int, groupID: int):
+        try:
+            statusUser = await self.botAPI.getChatMember(userID, groupID)
+        except Exception as e:
+            logging.warning('Error at %s', 'division', exc_info=e)
+            return False
+        statusGroup = self.database.infoGroup(groupID)[4]
+        if(statusGroup == 'member' or statusUser == 'creator'):
+            return True
+        if(statusUser == statusGroup):
+            return True
+        
+        return False
+        
+    async def checkSiren(self, text: str):
+        siren = False
+        if(SIREN in text):
+            siren = True
+        elif(ENDSIREN in text):
+            siren = False
+        else:
+            return False
+        name = ""
+        for city in cities:
+            if(city in text):
+                return {
+                    "status":siren,
+                    "city": cities[city] 
+                }
+        return False
+
+    async def updateSiren(self, text: str):
+        siren = await self.checkSiren(text)
+        row = self.database.updateCity(siren['city'], siren['status'])
+        if(row != 'ok'):
+            return row
+        if(siren['status'] == False):
+            groups = self.database.groupWithCity(siren['city'])
+            screenshot = await self.screenshotAPI.screenshot_alert()
+            for group in groups:
+                row = self.database.updateGroup(group[0], 'group_siren_id', '')
+                if(row != 'ok'):
+                    return row
+                try:
+                    msg = await self.sendSirenMessage(group[0], (localisation[group[5]]['vidboy']), False, False)
+                    await self.botAPI.editPhoto(msg, screenshot, (localisation[group[5]]['vidboy']))
+                    await self.botAPI.unpinMessage(group[0], group[8])
+                except:
+                    pass
+        return 'ok'
+        
+    async def checkGroupSiren(self):
+        cities = self.database.allCity()
+        groupWithSiren = []
+        for city in cities:
+            if city[2] == 1:
+                groups = self.database.groupWithCity(city[1])
+                if(groups != []):
+                    for group in groups:
+                        if(group[6] == 1):
+                            groupWithSiren.append(group)
+        return groupWithSiren
+    def get_key(self, d, value):
+        for k, v in d.items():
+            if v == value:
+                return k
+        return None
+
+    async def sendSiren(self):
+        groups = await self.checkGroupSiren()
+        if(groups == []):
+            self.session.update_somedata('siren', False)
+            return 'ok'
+        self.session.update_somedata('siren', True)
+        try:
+            screenshot = await self.screenshotAPI.screenshot_alert()
+        except:
+            pass
+        for group in groups:
+            if(group[8] in ['',None]):
+                try:
+                    msg = await self.sendSirenMessage(group[0], localisation[group[5]]['sirenMessage'] + ' ' + ((group[7]+(' Region','')[group[7] in ['Kyiv Region', 'Kyiv city', 'Autonomous Republic of Crimea']]), self.get_key(cities, group[7]))[group[5] == 'ua'] + "\n"+localisation[group[5]]['map_siren'] , True)
+                    row = self.database.updateGroup(group[0], 'group_siren_id', msg.message_id)
+                    if(row != 'ok'):
+                        return row
+                except Exception as e:
+                    logging.warning('Error at %s', 'division', exc_info=e)
+            else:
+                try:
+                    await self.botAPI.editPhotoByIds(group[0], group[8], screenshot, localisation[group[5]]['sirenMessage'] + ' ' + ((group[7]+(' Region','')[group[7] in ['Kyiv Region', 'Kyiv city', 'Autonomous Republic of Crimea']]), self.get_key(cities, group[7]))[group[5] == 'ua'] + "\n"+localisation[group[5]]['map_siren'])
+                except:
+                    pass    
+        import os
+        try:
+            os.remove('screenshot.png')
+        except:
+            pass
+        await self.sendSiren()
+
     async def sendPhotoFromSeesion(self, chatid: int, photoid : str, caption: str = "", messageId: str = None):
-        photo =  self.session.read_photo(photoid)
-        if(photo == ''):
+        photo = self.database.photo(photoid)
+        if(photo == None):
             mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
-            self.session.update_photo(photoid, self.idMaxPhoto(mes))
+            row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
+            if(row != 'ok'):
+                logging.critical(row)
         else:
             try:
                 mes = await self.botAPI.sendPhotobyID(chatid,photo, caption, messageId)
             except:
                 mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
-                self.session.update_photo(photoid, self.idMaxPhoto(mes))
+                row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
+                if(row != 'ok'):
+                    logging.critical(row)
         return mes
     
     async def updatePhotoFromSeesion(self, message, photoid : str, caption: str = ""):
-        photo =  self.session.read_photo(photoid)
-        if(photo == ''):
+        photo = self.database.photo(photoid)[0]
+        if(photo == None):
             mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
-            self.session.update_photo(photoid, self.idMaxPhoto(mes))
+            row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
+            if(row != 'ok'):
+                logging.critical(row)
         else:
             try:
                 mes = await self.botAPI.editPhotobyID(message,photo, caption)
             except:
                 mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
-                self.session.update_photo(photoid, self.idMaxPhoto(mes))
+                row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
+                if(row != 'ok'):
+                    logging.critical(row)
         return 
     
     def idMaxPhoto(self,message):
@@ -55,8 +184,8 @@ class Function:
         photo_sizes.sort(key=lambda photo_size: photo_size.width, reverse=True)
         photo_id = photo_sizes[0].file_id
         return photo_id
-    
-    async def screenshotSendSiren(self, chatid, caption: str, siren: bool, pinned: bool = True):
+
+    async def sendSirenMessage(self, chatid, caption: str, siren: bool, pinned: bool = True):
         import datetime, asyncio
         time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
         if time_h in range(8, 22):
@@ -73,26 +202,12 @@ class Function:
                     caption = caption
                 )
         if pinned:
-            await self.botAPI.pinMessage(chatid, msg.message_id)
-        while True:
             try:
-                await self.botAPI.editPhoto(msg, await self.screenshotAPI.screenshot_alert(), caption)
+                await self.botAPI.pinMessage(chatid, msg.message_id)
             except:
                 pass
-            import os
-            try:
-                os.remove('screenshot.png')
-            except:
-                pass
-            data = self.session.read_data()
-            if data['siren'] is False:
-                try:
-                    await self.botAPI.unpinMessage(chatid, msg.message_id)
-                except:
-                    pass
-                return 0
-            await asyncio.sleep(8)
-
+        
+        return msg
 
     async def screenshotSend(self, chatID: int, caption:str, message_id: int = None):
         import datetime
@@ -120,9 +235,10 @@ class Function:
 
     #voicy2text
     async def voicy2text(self, message):
+        group = self.database.infoGroup(message.chat.id)
         import os
         from src.convert import Converter
-        msg = await self.botAPI.reply(message, localisation['load_v2t'])
+        msg = await self.botAPI.reply(message, localisation[group[5]]['load_v2t'])
         file_id = message.voice.file_id if message.content_type in ['voice'] else message.video_note.file_id
         file_info = await self.botAPI.getFile(file_id)
         file_name = str(message.message_id) + '.ogg'
@@ -132,7 +248,7 @@ class Function:
         message_text = converter.audio_to_text()
         del converter
         if(message_text == None):
-            return await self.botAPI.editText(msg, localisation['fail_v2t'])
+            return await self.botAPI.editText(msg, localisation[group[5]]['fail_v2t'])
         return await self.botAPI.editText(msg, message_text)
 
     #search url from text
@@ -165,7 +281,7 @@ class Function:
                 )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
                 video_data = await snaptik(url)
-                if video_data == "":
+                if video_data == None:
                     await self.updatePhotoFromSeesion(
                         message = msg,
                         photoid= 'error'+theme
@@ -309,11 +425,3 @@ class Function:
                         photoid= 'error'+theme
                     )
                 logging.warning('Error at %s', 'division', exc_info=e)
-
-    #logs to file
-    async def logs(self, message):
-        import datetime
-        file = open("logs/logs_"+datetime.datetime.now().strftime("%d-%m-%Y")+".txt", "a+")
-        now = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        file.write(f"{message.chat.id}${message.from_user.id}${message.from_user.full_name}${now}${message}\n")
-        file.close()

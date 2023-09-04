@@ -12,7 +12,14 @@
         "Конвертування Youtube, TikTok, Instagram(Reels), Twitter посилань на відео",
         "Конвертування ваших голосових та відео-повідомлень у текст"
     ],
-    "version": "3.11(1)",
+    "version": "4.2",
+    "upgrade": {
+        "versionTo": "4.0",
+        "updateInfo": {
+            "ua": "<b>Нова версія бота!</b>\nВ версії 4.0: \n– Перероблено внутрішня робота бота, тепер є повний функціонал бота в будь-якому чаті, бот попереджує про тривогу в будь-якому обраному регіоні\n– Додані налаштування /settings\n– Додані різні мови(поки є українська та англійська, кацапської не буде. не сподівайтесь)\n\nІнші зміни стосуються внутрішньої роботи бота, якщо цікаво, то можете подивитися на <a href='https://github.com/kirillezh/misticbot'>GitHub</a>\n\n<a href='https://savelife.in.ua/donate/'>Слава Україні🇺🇦🇺🇦🇺🇦</a>",
+            "en": "<b>New version of the bot!</b>\nIn version 4.0:\n- Reworked the internal work of the bot, now there is a full functionality of the bot in any chat, the bot warns about an alarm in any selected region\n - Added settings /settings\n– Different languages have been added (while there is Ukrainian and English, there will be no Katsap. Don't get your hopes up)\n\nOther changes concern the internal work of the bot, if you are interested, you can look at <a href='https:// github.com/kirillezh/misticbot'>GitHub</a>\n\n<a href='https://savelife.in.ua/donate/'>Glory to Ukraine🇺🇦🇺🇦🇺🇦</a>" 
+        }
+    },
     "projectName": "misticbot",
     "ChangeLog": "https://headwayapp.co/misticbot-changes",
     "GitHub": "https://github.com/kirillezh/misticbot"
