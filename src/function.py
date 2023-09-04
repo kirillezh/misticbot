@@ -41,10 +41,10 @@ class Function:
             if(float(dbVersion) < float(versionTo['versionTo'])):
                 groups = self.database.allGroup()
                 for group in groups:
-                    #try:
+                    try:
                         await self.botAPI.sendMessage(group[0], versionTo['updateInfo'][group[5]], lang=group[5], end="")
-                    #except:
-                    #    pass
+                    except Exception as e:
+                        logging.warning('Error at %s', 'division', exc_info=e)
         
     async def checkStatus(self, userID: int, groupID: int):
         try:
