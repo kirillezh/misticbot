@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime
-from types import NoneType
 import logging, json
 
 class databaseAPI:
@@ -70,7 +69,7 @@ class databaseAPI:
         return self.database.execute(stmt).fetchall()
 
     def newUser(self, userID: int, userName: str, userUsername: str = '', userBio: str = '', userDataAdded = '', userPremium: bool = False):
-        if(type(userPremium) is NoneType):
+        if(not userPremium == True):
             userPremium = False
         stmt = "INSERT INTO users (user_id, user_username, user_name, user_bio, user_date_added, user_premium) VALUES (?, ?, ?, ?, ?, ?)"
         args = (userID, userUsername, userName,userBio, (datetime.now(), userDataAdded)[userDataAdded!=''], (0, 1)[userPremium])
