@@ -1,5 +1,5 @@
 from src.locales import DRIVER, GMT, localisation, cities, SIREN, ENDSIREN
-import logging, json
+import logging, json, os
 from src.telegramAPI import telegramAPI
 from src.twitterAPI import twitterAPI
 from src.session_pickle import SessionHelper
@@ -40,9 +40,13 @@ class Function:
             self.database.updateInfoBot(version)
             if(float(dbVersion) < float(versionTo['versionTo'])):
                 groups = self.database.allGroup()
+                
                 for group in groups:
                     try:
-                        await self.botAPI.sendMessage(group[0], versionTo['updateInfo'][group[5]], lang=group[5], end="")
+                        if(versionTo['photo'] != ''):
+                            await self.botAPI.sendPhoto(toСhat=group[0], photoId=('src/media/'+versionTo['photo']+self.timeTheme()+'.png'), caption=versionTo['updateInfo'][group[5]], lang=group[5], end="")
+                        else:
+                            await self.botAPI.sendMessage(group[0], versionTo['updateInfo'][group[5]], lang=group[5], end="")
                     except Exception as e:
                         logging.warning('Error at %s', 'division', exc_info=e)
         
@@ -147,14 +151,14 @@ class Function:
 
     async def sendPhotoFromSeesion(self, chatid: int, photoid : str, caption: str = "", messageId: str = None):
         photo = self.database.photo(photoid)
-        if(photo == None):
+        if(photo is None):
             mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
             row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
             if(row != 'ok'):
                 logging.critical(row)
         else:
             try:
-                mes = await self.botAPI.sendPhotobyID(chatid,photo, caption, messageId)
+                mes = await self.botAPI.sendPhotobyID(chatid,photo[0], caption, messageId)
             except:
                 mes = await self.botAPI.sendPhoto(chatid,"src/media/"+photoid+".png", caption, messageId)
                 row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
@@ -163,15 +167,15 @@ class Function:
         return mes
     
     async def updatePhotoFromSeesion(self, message, photoid : str, caption: str = ""):
-        photo = self.database.photo(photoid)[0]
-        if(photo == None):
+        photo = self.database.photo(photoid)
+        if(photo is None):
             mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
             row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
             if(row != 'ok'):
                 logging.critical(row)
         else:
             try:
-                mes = await self.botAPI.editPhotobyID(message,photo, caption)
+                mes = await self.botAPI.editPhotobyID(message,photo[0], caption)
             except:
                 mes = await self.botAPI.editPhoto(message,"src/media/"+photoid+".png", caption)
                 row = self.database.newPhoto(self.idMaxPhoto(mes), photoid)
@@ -261,22 +265,24 @@ class Function:
             return link
         except:
             return ''
+    def timeTheme(self):
+        import datetime
+        time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
+        if time_h in range(8, 22):
+            theme = 'Light'
+        else:
+            theme = 'Dark'
 
+        return theme
 
     #checking and sending tiktok-video
     async def tiktoktovideo(self, message):
         url=self.searchurl(message.text)
         if("vm.tiktok.com/" in url):
-            import datetime
-            time_h = getattr(datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(seconds=GMT*3600))), 'hour')
-            if time_h in range(8, 22):
-                theme = 'Light'
-            else:
-                theme = 'Dark'
             try:
                 msg = await self.sendPhotoFromSeesion(
                     chatid=message.chat.id,
-                    photoid= 'load'+theme,
+                    photoid= 'load'+self.timeTheme(),
                     messageId = message.message_id
                 )
                 await self.botAPI.sendReaction(message.chat.id, 'upload_video')
@@ -294,7 +300,7 @@ class Function:
             except Exception as e:
                 await self.updatePhotoFromSeesion(
                         message = msg,
-                        photoid= 'error'+theme
+                        photoid= 'error'+self.timeTheme()
                     )
                 logging.warning('Error at %s', 'division', exc_info=e)
             
@@ -302,41 +308,67 @@ class Function:
 
     #checking and sending youtube-video
     async def youtubetovideo(self, message):
-        url=self.searchurl(message.text)
+        url = self.searchurl(message.text)
+        group = self.database.infoGroup(message.chat.id)
         if("youtube.com/" in url or "youtu.be/" in url):
+            msg = await self.sendPhotoFromSeesion(
+                    chatid=message.chat.id,
+                    photoid= 'load'+self.timeTheme(),
+                    messageId = message.message_id
+                )
             await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-            file = self.youtubeapi(url)
-            try:
-                if(file != None):
-                    await self.botAPI.sendVideoURL(
-                        toСhat = message.chat.id, 
-                        videoURL = file["link"], 
-                        messageId = message.message_id,
-                        caption = file["name"])
-            except Exception as e:
-                logging.warning('Error at %s', 'division', exc_info=e)
-                
+            idVideo, titleVideo = self.youtubeapiID(url)
+            video = self.database.photo(f'youtube_{idVideo}')
+            if(not video is None):
+                await self.botAPI.editVideo(msg, video[0], titleVideo, lang=group[5])
+            else:
+                try:
+                    file = self.youtubeapi(url)
+                    msg = await self.botAPI.editVideoFile(message = msg, destVideo = 'video/'+file, text=titleVideo, lang=group[5])
+                    self.database.newPhoto(msg.video.file_id, 'youtube_'+idVideo)
+                except Exception as e:
+                    await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+self.timeTheme()
+                    )
+                    logging.warning('Error at %s', 'division', exc_info=e)
+                os.remove('video/'+file)
 
-    #url video
-    def youtubeapi(self, text):
+    def format_selector(self, ctx):
+        formats = ctx.get('formats')[::-1]
+        best_video = next(f for f in formats
+                        if f['vcodec'] != 'none' and f['acodec'] == 'none' and (f['quality'] in range(7,9)) and f['ext'] != 'webm')
+        audio_ext = {'mp4': 'm4a'}[best_video['ext']]
+        best_audio = next(f for f in formats if (
+            f['acodec'] != 'none' and f['vcodec'] == 'none' and f['ext'] == audio_ext))
+        yield {
+            'format_id': f'{best_video["format_id"]}+{best_audio["format_id"]}',
+            'ext': best_video['ext'],
+            'requested_formats': [best_video, best_audio],
+            'protocol': f'{best_video["protocol"]}+{best_audio["protocol"]}'
+        }
+
+    def youtubeapiID(self, url):
         from yt_dlp import YoutubeDL
         ydl_opts = {'logger':loggerYT()}
-        yt = YoutubeDL(ydl_opts)
-        r = yt.extract_info(text, download=False)
-        try:
-            urls = [f for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none' and f['filesize_approx'] < 20900000]         
-        except KeyError as e:
-            urls = [f for f in r['formats'] if f['video_ext'] == 'mp4' and f['acodec'] != 'none' and f['vcodec'] != 'none' and ( (f['filesize'] != None and f['filesize'] < 20900000))]
-        if(urls == []):
-            return None
-        try:
-                vid = {
-                    "link": urls[0]['url'],
-                    "name": r['title']
-                }
-                return vid
-        except:
-                return None
+        ydl = YoutubeDL(ydl_opts)
+        info = ydl.extract_info(url, download=False)
+        return info['id'], info['title']
+
+    #url video
+    def youtubeapi(self, url):
+        from yt_dlp import YoutubeDL
+        ydl_opts = {
+            'format': self.format_selector,
+            'outtmpl': os.path.join('video', '%(id)s.%(ext)s'),
+            'logger':loggerYT()
+        }
+
+        ydl = YoutubeDL(ydl_opts)
+        info = ydl.extract_info(url, download=True)
+        inf = list(self.format_selector(info))[0]
+        return info['id'] + '.' + inf['ext']
+
 
     #checking and sending insta-video
     async def instatovideo(self, message):

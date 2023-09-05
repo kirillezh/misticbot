@@ -13,3 +13,5 @@ data.pickle
 instauser
 *.db
 *.sqlite
+*.mp4
+video

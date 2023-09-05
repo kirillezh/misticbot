@@ -27,9 +27,6 @@ from src.session_pickle import SessionHelper
 
 from src.dbHelper import dbHelper
 
-
-
-
 botAPI = telegramAPI(bot)
 session = SessionHelper()
 
@@ -44,18 +41,6 @@ async def siren(message):
         logging.warning(row)
     if(not session.read_data()['siren']):
         await function.sendSiren()
-    '''if SIREN in str(message.message) or END in str(message.message):
-        data = session.read_data()
-        if SIREN in str(message.message):
-            data['siren'] = True
-            caption = random.sample(localisation['ptn_xuilo'], k=1)[0]+"\n"+localisation['map_siren']
-            pinned = True
-        elif(END in str(message.message)):
-            data['siren'] = False
-            caption = localisation['vidboy']
-            pinned = False
-        session.load_data(data)
-        await function.screenshotSendSiren(CHAT_ID, caption, data['siren'], pinned)'''
 
 #Send a screenshot
 @dp.message_handler(commands=['screenshot'])

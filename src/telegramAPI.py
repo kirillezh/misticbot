@@ -3,7 +3,9 @@ class telegramAPI:
     def __init__(self, bot):
         self.bot=bot
 
-    async def sendPhotobyID(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, end: str = " \n"+localisation['ua']['end']):
+    async def sendPhotobyID(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, lang: str = 'ua', end: str ="def"):
+        if(end == "def"):
+             end = " \n"+localisation[lang]['end']
         if messageId is None:
             return await self.bot.send_photo(
                 chat_id=toСhat, 
@@ -18,7 +20,9 @@ class telegramAPI:
                 parse_mode="HTML",
                 reply_to_message_id=messageId)
 
-    async def sendPhoto(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, end: str = " \n"+localisation['ua']['end']):
+    async def sendPhoto(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, lang: str = 'ua', end: str ="def"):
+        if(end == "def"):
+             end = " \n"+localisation[lang]['end']
         if messageId is None:
             return await self.bot.send_photo(
                 chat_id=toСhat, 
@@ -33,7 +37,9 @@ class telegramAPI:
                 parse_mode="HTML",
                 reply_to_message_id=messageId)
 
-    async def uploadPhoto(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, end: str = " \n"+localisation['ua']['end']):
+    async def uploadPhoto(self, toСhat: int, photoId: str, caption: str = "", messageId: str = None, lang: str = 'ua', end: str ="def"):
+        if(end == "def"):
+             end = " \n"+localisation[lang]['end']
         if messageId is None:
             return await self.bot.send_photo(
                 chat_id=toСhat, 
@@ -48,7 +54,9 @@ class telegramAPI:
                 parse_mode="HTML",
                 reply_to_message_id=messageId)
     
-    async def sendVideoURL(self, toСhat: int, videoURL: str, messageId: int,caption: str = "", end: str = " \n"+localisation['ua']['end'], disableNotification: bool = True):
+    async def sendVideoURL(self, toСhat: int, videoURL: str, messageId: int,caption: str = "", lang: str = 'ua', end: str ="def", disableNotification: bool = True):
+        if(end == "def"):
+             end = " \n"+localisation[lang]['end']
         if messageId is None:
             await self.bot.send_video(
                     chat_id=toСhat, 
@@ -64,6 +72,7 @@ class telegramAPI:
                     caption=caption+end,
                     parse_mode="HTML",
                     disable_notification = disableNotification)
+
     
     async def replyWithButtons(self, message, text: str, keyboard, lang: str = 'ua', end: str ="def", disableURL: bool = True, reply: bool = True):
         if(end == "def"):
@@ -115,8 +124,19 @@ class telegramAPI:
         if(end == "def"):
              end = " \n"+localisation[lang]['end']
         from aiogram import types
-        await self.bot.edit_message_media(
+        return await self.bot.edit_message_media(
         media = types.InputMediaVideo(videoId,
+            caption = f"{text}{end}",
+            parse_mode="HTML"),
+        chat_id = message.chat.id,
+        message_id = message.message_id
+        )
+    async def editVideoFile(self, message, destVideo: str, text: str, end: str = "def", lang: str = 'ua'):
+        if(end == "def"):
+             end = " \n"+localisation[lang]['end']
+        from aiogram import types
+        return await self.bot.edit_message_media(
+        media = types.InputMediaVideo(open(destVideo, 'rb'),
             caption = f"{text}{end}",
             parse_mode="HTML"),
         chat_id = message.chat.id,
