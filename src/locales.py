@@ -61,9 +61,8 @@ localisation = {
             "Украиною": "Украиною🇺🇦"
         },
         "error": "Помилка(",
-        "vidboy": "З відбоєм дупи!",
-        "screenshot" : "що за? це ТЕСТУВАННЯ",
-        "alert" : "та ти заїбав!!!!",
+        "vidboy": "Загроза минула! Повертайтесь до своїх справ!",
+        "screenshot" : "Поточна карта тривог",
         "leave" : "Не витримав цього тиску та змився((",
         "end": "<a href='https://savelife.in.ua/donate/'>Слава Україні🇺🇦🇺🇦🇺🇦</a>",
         "version": "Версія",
@@ -132,9 +131,8 @@ localisation = {
             "Украиною": "Украиною🇺🇦"
         },
         "error": "Error",
-        "vidboy": "With kick ass!",
-        "screenshot" : "what? this is TESTING",
-        "alert" : "and you screwed up!!!!",
+        "vidboy": "Air Raid Clearance",
+        "screenshot" : "Current alarm map",
         "leave" : "Couldn't stand this pressure and washed away((",
         "end": "<a href='https://savelife.in.ua/donate/'>Glory to Ukraine🇺🇦🇺🇦🇺🇦</a>",
         "version": "Version",

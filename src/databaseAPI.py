@@ -106,7 +106,7 @@ class databaseAPI:
         stmt = "SELECT * FROM supergroup ORDER BY group_date_added"
         return self.database.execute(stmt).fetchall()
 
-    def newGroup(self, groupID: int, groupName: str, groupBio: str = '', groupDataAdded = '', groupAdmins: str = "administrator", groupLang: str = "ua", groupSiren: bool = False, groupCity: str = "Kyiv city", groupVoicy: bool = True, groupTiktok: bool = True, groupYoutube: bool = False, groupReels: bool = False, groupTwitter: bool = False):
+    def newGroup(self, groupID: int, groupName: str, groupBio: str = '', groupDataAdded = '', groupAdmins: str = "administrator", groupLang: str = "ua", groupSiren: bool = False, groupCity: str = "Kyiv city", groupVoicy: bool = True, groupTiktok: bool = True, groupYoutube: bool = True, groupReels: bool = False, groupTwitter: bool = False):
         stmt = "INSERT INTO supergroup (group_id, group_name, group_bio, group_date_added, group_admins, group_lang, group_siren, group_city, group_voicy, group_tiktok, group_youtube, group_reels, group_twitter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         args = (groupID, groupName, groupBio, (datetime.now(), groupDataAdded)[groupDataAdded!=''], groupAdmins, groupLang, (groupSiren if 1 else 0), groupCity, (groupVoicy if 1 else 0), (groupTiktok if 1 else 0), (groupYoutube if 1 else 0), (groupReels if 1 else 0), (groupTwitter if 1 else 0))
         try:

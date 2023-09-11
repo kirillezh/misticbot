@@ -6,12 +6,13 @@ from aiogram.types.input_media import *
 from aiogram.types import ContentType, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters import Text
 
-import logging, random
+import logging, random, datetime, os
 from array import *
 
-from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, localisation, cities, LEVELLOGGINING
-
+from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, localisation, cities, LEVELLOGGINING, GMT
+os.environ['TZ'] = str(datetime.timezone(datetime.timedelta(hours=-GMT)))
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
+
 
 # Start telethon
 client = TelegramClient('session',API_ID, API_HASH)
@@ -36,9 +37,11 @@ function = Function(bot, database)
 #Siren
 @client.on(events.NewMessage(chats=[CHANNEL]))
 async def siren(message):
-    row = await function.updateSiren(str(message.message))
+    row = await function.updateSiren(str(message.message.message))
+    if(row == 'Not Found'):
+        return
     if(row != 'ok'):
-        logging.warning(row)
+        return logging.warning('Siren: ' + row)
     if(not session.read_data()['siren']):
         await function.sendSiren()
 
@@ -48,7 +51,7 @@ async def screenshot(message: types.Message):
     try:
         row = database.full_check(message)
         if(row != 'ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
         group = database.infoGroup(message.chat.id)
         await function.screenshotSend(message.chat.id, localisation[group[5]]['screenshot'], message.message_id)
     except Exception as e:
@@ -60,7 +63,7 @@ async def start(message: types.Message):
     try:
         row = database.full_check(message)
         if(row != 'ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
         group = database.infoGroup(message.chat.id)
         await botAPI.reply(message, localisation[group[5]]['start'], lang=group[5])
     except Exception as e:
@@ -110,7 +113,7 @@ async def settings(message: types.Message):
     try:
         row = database.full_check(message)
         if(row != 'ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
         group = database.infoGroup(message.chat.id)
 
         level = await function.checkStatus(message.from_user.id, message.chat.id)
@@ -162,7 +165,7 @@ async def setLang(call: types.CallbackQuery):
             return
         row = database.updateGroup(call.message.chat.id, 'group_lang', str(lang))
         if(row !='ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
             return
         group = database.infoGroup(call.message.chat.id)
         await botAPI.editTextWithButtons(call.message, localisation[group[5]]['settings']['main']['text']+': '+localisation[group[5]]['settings']['main']['setLang'], languageSettingsButtons(group), end='', lang=group[5])
@@ -202,7 +205,7 @@ async def setCity(call: types.CallbackQuery):
             return
         row = database.updateGroup(call.message.chat.id, 'group_city', str(city))
         if(row !='ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
             return
         group = database.infoGroup(call.message.chat.id)
         await botAPI.editTextWithButtons(call.message, localisation[group[5]]['settings']['main']['text']+': '+localisation[group[5]]['settings']['main']['setCity'], citiesSettingsButtons(group), end='', lang=group[5])
@@ -242,7 +245,7 @@ async def setLevel(call: types.CallbackQuery):
             return
         row = database.updateGroup(call.message.chat.id, 'group_admins', str(levelTo))
         if(row !='ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
             return
         group = database.infoGroup(call.message.chat.id)
         await botAPI.editTextWithButtons(call.message, localisation[group[5]]['settings']['main']['text']+': '+localisation[group[5]]['settings']['main']['setAccess'], accessLevelSettingsButtons(group), end='', lang=group[5])
@@ -286,23 +289,11 @@ async def setSettings(call: types.CallbackQuery):
             return
         row = database.updateGroup(call.message.chat.id, action, (1, 0)[group[arg] == 1])
         if(row !='ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
             return
         group = database.infoGroup(call.message.chat.id)
         keyboard = types.InlineKeyboardMarkup()
         await botAPI.editTextWithButtons(call.message, localisation[group[5]]['settings']['main']['text'], mainSettingsButtons(group) , end='', lang=group[5])
-    except Exception as e:
-        logging.warning('Error at %s', 'division', exc_info=e)
-
-#Alert
-@dp.message_handler(commands=['alert'])
-async def alert(message: types.Message):
-    try:
-        row = database.full_check(message)
-        if(row != 'ok'):
-            logging.warning(row)
-        group = database.infoGroup(message.chat.id)
-        await botAPI.reply(message, localisation[group[5]]['alert'], lang=group[5])
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 
@@ -312,9 +303,11 @@ async def info(message: types.Message):
     try:
         row = database.full_check(message)
         if(row != 'ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
+        
         group = database.infoGroup(message.chat.id)
-        await botAPI.reply(message, localisation[group[5]]['version']+': '+function.checkLocalInfo('version'), end="")
+        update = function.checkLocalInfo('upgrade')
+        await botAPI.reply(message, localisation[group[5]]['version']+': '+function.checkLocalInfo('version')+'\n\n'+update['updateInfo'][group[5]], end="")
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 
@@ -324,7 +317,7 @@ async def mdc_all(message: types.Message):
     try:
         row = database.full_check(message)
         if(row != 'ok'):
-            logging.warning(row)
+            logging.warning('Error with DB: ' + row)
         group = database.infoGroup(message.chat.id)
         
         if(message.content_type in [ContentType.NEW_CHAT_MEMBERS]):
@@ -343,7 +336,7 @@ async def mdc_all(message: types.Message):
                 if(message.left_chat_member.id == me.id):
                     row = database.updateGroup(group[0], 'group_siren', False)
                     if(row != 'ok'):
-                        logging.warning(row)
+                        logging.warning('Error with DB: ' + row)
         if(group[9] == 1):
             if(message.content_type in [types.ContentType.VOICE, types.ContentType.VIDEO_NOTE]):
                 await function.voicy2text(message)

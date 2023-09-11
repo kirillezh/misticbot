@@ -83,6 +83,8 @@ class Function:
 
     async def updateSiren(self, text: str):
         siren = await self.checkSiren(text)
+        if(siren == False):
+            return 'Not Found'
         row = self.database.updateCity(siren['city'], siren['status'])
         if(row != 'ok'):
             return row
