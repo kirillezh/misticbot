@@ -4,25 +4,25 @@ from dotenv import load_dotenv
 #import .env file
 load_dotenv()
 
-API_ID = int(os.getenv('API_ID'))
-API_HASH = os.getenv('API_HASH')
+#API_ID = int(os.getenv('API_ID'))
+#API_HASH = os.getenv('API_HASH')
 
 CHAT_ID = int(os.getenv('CHAT_ID'))
 
 API_TOKEN = os.getenv('API_TOKEN')
 
+API_TOKEN_ALERT = os.getenv('API_TOKEN_ALERT')
+
 DRIVER = os.getenv('DRIVER')
 
-CHANNEL = os.getenv('CHANNEL')
+#CHANNEL = os.getenv('CHANNEL')
 
 URL = os.getenv('URL')
 
 GMT = int(os.getenv('GMT'))
 
-SIREN = os.getenv('SIREN')
-ENDSIREN = os.getenv('END')
-
-RANDOM = os.getenv('RANDOM')
+#SIREN = os.getenv('SIREN')
+#ENDSIREN = os.getenv('END')
 
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
 
@@ -196,4 +196,33 @@ cities = {
     "Вінницька область": "Vinnytsia",
     "Волинська область": "Volyn",
     "Запорізька область": "Zaporizhia"
+}
+
+defenitionAPIUID = {
+    '9': "Dnipropetrovsk",
+    '14': "Kyiv Region",
+    '31': "Kyiv city",
+    '5': "Rivne",
+    '10': "Zhytomyr",
+    '11': "Zakarpattia",
+    '3': "Khmelnytskyi",
+    '29': "Autonomous Republic of Crimea",
+    '24': "Cherkasy",
+    '25': "Chernihiv",
+    '26': "Chernivtsi",
+    '28': "Donetsk",
+    '13': "Ivano-Frankivsk",
+    '22': "Kharkiv",
+    '23': "Kherson",
+    '15': "Kirovohrad",
+    '16': "Luhansk",
+    '27': "Lviv",
+    '17': "Mykolaiv",
+    '18': "Odesa",
+    '19': "Poltava",
+    '20': "Sumy",
+    '21': "Ternopil",
+    '4': "Vinnytsia",
+    '8': "Volyn",
+    '12': "Zaporizhia"
 }

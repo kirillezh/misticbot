@@ -28,7 +28,7 @@ class APIScreenshot:
         else:
             self.mode = True
 
-    async def screenshot_alert(self):
+    async def screenshot_alert(self, srcName: str = 'screenshot.png'):
         if self.browser == None:
             await self.start()
         import asyncio
@@ -51,7 +51,7 @@ class APIScreenshot:
         await page.goto(URL)
         await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.mode else 'black-preset light') +" menu-hidden'")
         await asyncio.sleep(3)
-        await page.screenshot({'path': 'screenshot.png'})
+        await page.screenshot({'path': srcName})
         await page.close()
-        return 'screenshot.png'
+        return srcName
     

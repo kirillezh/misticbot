@@ -1,22 +1,15 @@
-#import telethon
-from telethon import TelegramClient, events
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types.input_media import *
 from aiogram.types import ContentType, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters import Text
 
-import logging, random, datetime, os
+import logging, datetime, os, asyncio
 from array import *
 
-from src.locales import API_ID, API_HASH, CHAT_ID, CHANNEL, API_TOKEN, localisation, cities, LEVELLOGGINING, GMT
+from src.locales import API_TOKEN, localisation, cities, LEVELLOGGINING, GMT
 os.environ['TZ'] = str(datetime.timezone(datetime.timedelta(hours=-GMT)))
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
-
-
-# Start telethon
-client = TelegramClient('session',API_ID, API_HASH)
-client.start()
 
 # Start aiogram
 bot = Bot(token=API_TOKEN)
@@ -24,38 +17,13 @@ dp = Dispatcher(bot)
 
 from src.function import Function
 from src.telegramAPI import telegramAPI
-from src.session_pickle import SessionHelper
-
 from src.dbHelper import dbHelper
+from src.siren import Siren
 
 botAPI = telegramAPI(bot)
-session = SessionHelper()
-
 database = dbHelper()
-
 function = Function(bot, database)
-#Siren
-@client.on(events.NewMessage(chats=[CHANNEL]))
-async def siren(message):
-    row = await function.updateSiren(str(message.message.message))
-    if(row == 'Not Found'):
-        return
-    if(row != 'ok'):
-        return logging.warning('Siren: ' + row)
-    if(not session.read_data()['siren']):
-        await function.sendSiren()
-
-#Send a screenshot
-@dp.message_handler(commands=['screenshot'])
-async def screenshot(message: types.Message):
-    try:
-        row = database.full_check(message)
-        if(row != 'ok'):
-            logging.warning('Error with DB: ' + row)
-        group = database.infoGroup(message.chat.id)
-        await function.screenshotSend(message.chat.id, localisation[group[5]]['screenshot'], message.message_id)
-    except Exception as e:
-        logging.warning('Error at %s', 'division', exc_info=e)
+sirenAPI = Siren(bot, database, function)
 
 #Start
 @dp.message_handler(commands=['start'])
@@ -66,6 +34,18 @@ async def start(message: types.Message):
             logging.warning('Error with DB: ' + row)
         group = database.infoGroup(message.chat.id)
         await botAPI.reply(message, localisation[group[5]]['start'], lang=group[5])
+    except Exception as e:
+        logging.warning('Error at %s', 'division', exc_info=e)
+
+#Send a screenshot
+@dp.message_handler(commands=['screenshot'])
+async def screenshot(message: types.Message):
+    try:
+        row = database.full_check(message)
+        if(row != 'ok'):
+            logging.warning('Error with DB: ' + row)
+        group = database.infoGroup(message.chat.id)
+        await sirenAPI.screenshotSend(message.chat.id, localisation[group[5]]['screenshot'], message.message_id)
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
 
@@ -356,6 +336,15 @@ async def mdc_all(message: types.Message):
 async def on_startup(call):
     await function.on_startup()
 
+async def start_bot():
+    event_loop.create_task(dp.start_polling())
+    await function.on_startup()
+    
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    event_loop = asyncio.get_event_loop()
+    event_loop.run_until_complete(start_bot())
+    event_loop.run_until_complete(sirenAPI.startSiren())
+    event_loop.run_forever()
+
+    
     
