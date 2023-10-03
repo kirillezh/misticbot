@@ -41,21 +41,39 @@ class SnaptikAsync(AsyncClient):
         )
         if 'error_api_web;' in resp.text or 'Error:' in resp.text:
             raise InvalidUrl()
-        #stderr.flush()
+        
         dec = decoder(*literal_eval(
             findall(
                 r'\(\".*?,.*?,.*?,.*?,.*?.*?\)',
                 resp.text
             )[0]
         ))
+        
         try:
             name = findall(r'<div class=\\"video-title\\">(.*?)</div>', dec)[0].encode('latin-1').decode('utf-8')
         except:
             name = ''
+        
+        link = findall(r'<a href=\\"(https?://[\w\./\-&?=]+)\\" class=\\"button download-file mt-3\\" ', dec)
+        if(len(link) == 0):
+            token =  findall(r'<button class=\\"button btn-render\\" data-token=\\"(.*?)\\" data-ad=\\"true\\" data-event=\\"click_render\\" rel=\\"nofollow\\">', dec)[0]
+            resp2 = await self.get(
+            'https://snaptik.app/render.php',
+            params={
+                'token': token,
+                },
+            )
+            if 'error_api_web;' in resp2.text or 'Error:' in resp2.text:
+                raise InvalidUrl()
+
+            linkv = findall(r'\",\"task_url\":\"(.*?)\",\"status\"', resp2.text)[0]
+            resp3 = await self.get(linkv)
+            link = findall(r'\"download_url\":\"(.*?)\"}', resp3.text)
+        
         try:
             return {
-                'name': name,
-                'link': findall(r'<a href=\\"(https?://[\w\./\-&?=]+)', dec)[0]
+                'name': name if name != 'No description' else '',
+                'link': link[0]
             }
         except:
             return ""

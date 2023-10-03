@@ -29,9 +29,8 @@ class Siren:
         try:
             air_raid_locations = await self.alert_client.get_active_alerts()
         except:
-            raise TooManyRequests("API Reach Limit. You should call API no more than 3-4 times per minute")
+            raise Exception("API Reach Limit. You should call API no more than 3-4 times per minute")
         locations = air_raid_locations.filter('alert_type', "air_raid", 'location_type', "oblast")
-
         sirenList = []
         for alert in locations:
             sirenList.append((alert.location_uid, alert.location_title))
@@ -47,29 +46,29 @@ class Siren:
 
     #Start Function 
     async def startSiren(self):
-        try:
-            nowSirenList = await self.getSirenAPI()
-        except:
-            await asyncio.sleep(60)
-            await self.startSiren()
+        while(True):
+            try:
+                nowSirenList = await self.getSirenAPI()
+            except Exception as e:
+                logging.warning(e)
+                await asyncio.sleep(60)
+                continue
 
-        dbSirenList = self.database.allCity()
-        sirenList, allClearList = self.compareSiren(nowSirenList, dbSirenList)
-        logging.info(sirenList, allClearList)
-        for city in sirenList:
-            row = self.database.updateCity(city, 1)
-            if(row != 'ok'):
-                logging.error('DB_ERROR', row)
+            dbSirenList = self.database.allCity()
+            sirenList, allClearList = self.compareSiren(nowSirenList, dbSirenList)
+            for city in sirenList:
+                row = self.database.updateCity(city, 1)
+                if(row != 'ok'):
+                    logging.error('DB_ERROR', row)
 
-        for city in allClearList:
-            row = self.database.updateCity(city, 0)
-            if(row != 'ok'):
-                logging.error('DB_ERROR', row)
-            await self.allClear(city)
+            for city in allClearList:
+                row = self.database.updateCity(city, 0)
+                if(row != 'ok'):
+                    logging.error('DB_ERROR', row)
+                await self.allClear(city)
 
-        await self.sendSiren()
-
-        await asyncio.sleep(10)
+            await self.sendSiren()
+            await asyncio.sleep(10)
         await self.startSiren()
 
     #Function to check group where need to send message about status Siren
@@ -98,10 +97,13 @@ class Siren:
             try:
                 msg = await self.function.sendPhotoFromSeesion(group[0], 'clean'+theme, (localisation[group[5]]['vidboy']))
                 iDS.append((msg, group[5]))
-                if(group[8] != ''):
-                        await self.botAPI.unpinMessage(group[0], group[8])
             except Exception as e:
                 logging.warning('Error at %s', 'division', exc_info=e)
+            try:
+                if(group[8] != ''):
+                        await self.botAPI.unpinMessage(group[0], group[8])
+            except:
+                pass
         screenshot = await self.screenshotAPI.screenshot_alert()
         for mes, lang in iDS:
             try:

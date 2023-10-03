@@ -147,6 +147,7 @@ class Function:
     async def tiktoktovideo(self, message):
         url=self.searchurl(message.text)
         if("vm.tiktok.com/" in url):
+            import aiogram
             try:
                 msg = await self.sendPhotoFromSeesion(
                     chatid=message.chat.id,
@@ -165,6 +166,14 @@ class Function:
                     message= msg,
                     videoId = video_data["link"], 
                     text= video_data["name"])
+            except aiogram.utils.exceptions.InvalidHTTPUrlContent as e:
+                await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+self.timeTheme(),
+                        caption="Відео завелике, або інші проблеми:("
+                    )
+                logging.warning('Error: Problems with video: '+url)
+                ...
             except Exception as e:
                 await self.updatePhotoFromSeesion(
                         message = msg,
