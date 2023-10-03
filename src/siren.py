@@ -55,6 +55,7 @@ class Siren:
 
         dbSirenList = self.database.allCity()
         sirenList, allClearList = self.compareSiren(nowSirenList, dbSirenList)
+        logging.info(sirenList, allClearList)
         for city in sirenList:
             row = self.database.updateCity(city, 1)
             if(row != 'ok'):
@@ -94,13 +95,13 @@ class Siren:
             row = self.database.updateGroup(group[0], 'group_siren_id', '')
             if(row != 'ok'):
                 logging.error('DB_ERROR', row)
-            #try:
-            msg = await self.function.sendPhotoFromSeesion(group[0], 'clean'+theme, (localisation[group[5]]['vidboy']))
-            iDS.append((msg, group[5]))
-            if(group[8] != ''):
+            try:
+                msg = await self.function.sendPhotoFromSeesion(group[0], 'clean'+theme, (localisation[group[5]]['vidboy']))
+                iDS.append((msg, group[5]))
+                if(group[8] != ''):
                         await self.botAPI.unpinMessage(group[0], group[8])
-            #except:
-            #    pass
+            except Exception as e:
+                logging.warning('Error at %s', 'division', exc_info=e)
         screenshot = await self.screenshotAPI.screenshot_alert()
         for mes, lang in iDS:
             try:
@@ -116,7 +117,7 @@ class Siren:
         for group in groups:
             if(group[8] in ['',None]):
                 try:
-                    msg = await self.function.sendPhotoFromSeesion(group[0], 'siren'+theme, localisation[group[5]]['sirenMessage'] + ' ' + ((group[7]+(' Region','')[group[7] in ['Kyiv Region', 'Kyiv city', 'Autonomous Republic of Crimea']]), self.function.get_key(cities, group[7]))[group[5] == 'ua'] + "\n"+localisation[group[5]]['map_siren'] , lang=group[5])
+                    msg = await self.function.sendPhotoFromSeesion(group[0], 'siren'+theme, localisation[group[5]]['sirenMessage'] + ' ' + ((group[7]+(' Region','')[group[7] in ['Kyiv Region', 'Kyiv city', 'Autonomous Republic of Crimea']]), self.function.get_key(cities, group[7]))[group[5] == 'ua'] + "\n"+localisation[group[5]]['map_siren'])
                     row = self.database.updateGroup(group[0], 'group_siren_id', msg.message_id)
                     if(row != 'ok'):
                         return row
