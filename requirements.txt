@@ -12,3 +12,4 @@ pyppeteer==1.0.2
 instaloader==4.9.6
 httpx==0.24.1
 alerts-in-ua==0.2.5
+opencv-python==4.8.1.78
