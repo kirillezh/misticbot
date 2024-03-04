@@ -41,11 +41,13 @@ class APIScreenshot:
         localStorage.setItem('preset', 'black');
         localStorage.setItem('showThreats', true);
         localStorage.setItem('showRivers', true);
-        localStorage.setItem('showWarnings', true);
-        localStorage.setItem('durationTimeFormat', 'h. m.');
+        localStorage.setItem('showWarnings', true)
         localStorage.setItem('showMapIcons', true);
         localStorage.setItem('showNeighbourRegions', true);
+        localStorage.setItem('showForeignEvents', true);
         localStorage.setItem('showUnofficialArtillery', true);
+        localStorage.setItem('showPotentialThreats', true);
+        localStorage.setItem('showAllOccupiedRegions', true);
         }'''
         )
         await page.goto(URL)

@@ -68,7 +68,7 @@ class Siren:
                 await self.allClear(city)
 
             await self.sendSiren()
-            await asyncio.sleep(10)
+            await asyncio.sleep(13)
         await self.startSiren()
 
     #Function to check group where need to send message about status Siren

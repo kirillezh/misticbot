@@ -124,21 +124,25 @@ class telegramAPI:
         if(end == "def"):
              end = " \n"+localisation[lang]['end']
         from aiogram import types
+        print(videoId)
         return await self.bot.edit_message_media(
-        media = types.InputMediaVideo(videoId,
+        media = types.InputMediaVideo(
+            media=videoId,
             caption = f"{text}{end}",
             parse_mode="HTML"),
         chat_id = message.chat.id,
         message_id = message.message_id
         )
-    async def editVideoFile(self, message, destVideo: str, text: str, end: str = "def", lang: str = 'ua'):
+    async def editVideoFile(self, message, destVideo: str,w:str, h:str, text: str, end: str = "def", lang: str = 'ua'):
         if(end == "def"):
              end = " \n"+localisation[lang]['end']
         from aiogram import types
         return await self.bot.edit_message_media(
         media = types.InputMediaVideo(open(destVideo, 'rb'),
             caption = f"{text}{end}",
-            parse_mode="HTML"),
+            parse_mode="HTML",
+            width=w,
+            height=h),
         chat_id = message.chat.id,
         message_id = message.message_id
         )

@@ -26,6 +26,7 @@ GMT = int(os.getenv('GMT'))
 
 LEVELLOGGINING = str(os.getenv('LEVELLOGGINING'))
 
+SERVER_ADDRESS = str(os.getenv('SERVER_ADDRESS'))
 
 localisation = {
     'ua': {
@@ -71,6 +72,7 @@ localisation = {
         "start": 'Хай! \n\nТак, я трохи дивний бот, але взагалі я прикольний бот:) \nЯ можу твої тики-токи та ютубчик зі звичайного посилання у видосик конвертувати... Ну тобі ж лінь скачати відео, правда?)\nПовідомляю і хуесошу, коли хуйло хоче запустити в Дніпро ракету, також радію з Вами, коли скасовують тривогу\nЄ ще декілька функцій... Але про них дізнаєтеся пізніше) \n\nУсім любові та миру, крім довбанутих(сосіян)❤️',
         "map_siren": "Карта оновлюється постійно до відбою",
         "sirenMessage": "Тривога в",
+        "error_video": "Відео завелике, або інші проблеми:(",
         "settings": {
             "main":{
                 "text": "<b>Налаштування</b>",
@@ -141,6 +143,7 @@ localisation = {
         "start": 'Hy! \n\nYes, I\'m a bit of a strange bot, but in general I\'m a cool bot:) \nI can convert your tiktoks and YouTube videos from a normal link to a video... Well, you\'re too lazy to download videos, aren\'t you?)\nI also inform Huesosha, when the bastard wants to launch a rocket into the Dnipro, I am also happy with you when the alarm is canceled\nThere are a few more functions... But you will learn about them later) \n\nLove and peace to all, except for the dovbanut(susians)❤️',
         "map_siren": "The map is constantly updated until it crashes",
         "sirenMessage": "Siren in",
+        "error_video": "Video is too big or other problems (",
         "settings": {
             "main":{
                 "text": "<b>Settings</b>",

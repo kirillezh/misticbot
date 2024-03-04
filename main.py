@@ -1,5 +1,6 @@
 #import aiogram
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.bot.api import TelegramAPIServer
 from aiogram.types.input_media import *
 from aiogram.types import ContentType, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters import Text
@@ -7,12 +8,15 @@ from aiogram.dispatcher.filters import Text
 import logging, datetime, os, asyncio
 from array import *
 
-from src.locales import API_TOKEN, localisation, cities, LEVELLOGGINING, GMT
+from src.locales import API_TOKEN, localisation, cities, LEVELLOGGINING, GMT, SERVER_ADDRESS
 os.environ['TZ'] = str(datetime.timezone(datetime.timedelta(hours=-GMT)))
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(name)s: %(message)s', level=LEVELLOGGINING)
 
 # Start aiogram
-bot = Bot(token=API_TOKEN)
+if(SERVER_ADDRESS == ""):
+    bot = Bot(token=API_TOKEN)
+else: 
+    bot = Bot(token=API_TOKEN, server=TelegramAPIServer.from_base(SERVER_ADDRESS))
 dp = Dispatcher(bot)
 
 from src.function import Function
@@ -61,8 +65,8 @@ def mainSettingsButtons(group: int):
     keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[9] == 1]+localisation[group[5]]['settings']['main']['set_Voicy']), callback_data="set_Voicy"))
     keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[10] == 1]+localisation[group[5]]['settings']['main']['set_TikTok']), callback_data="set_TikTok"))
     keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[11] == 1]+localisation[group[5]]['settings']['main']['set_Youtube']), callback_data="set_Youtube"))
-    keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[12] == 1]+localisation[group[5]]['settings']['main']['set_Reels']), callback_data="set_Reels"))
-    keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[13] == 1]+localisation[group[5]]['settings']['main']['set_Twitter']), callback_data="set_Twitter"))
+    #keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[12] == 1]+localisation[group[5]]['settings']['main']['set_Reels']), callback_data="set_Reels"))
+   #keyboard.add(types.InlineKeyboardButton(text=(('🔴️️', '🟢')[group[13] == 1]+localisation[group[5]]['settings']['main']['set_Twitter']), callback_data="set_Twitter"))
     keyboard.add(types.InlineKeyboardButton(text=(localisation[group[5]]['settings']['main']['exit']), callback_data="set_Exit"))
     return keyboard
 
@@ -326,9 +330,11 @@ async def mdc_all(message: types.Message):
             if(group[11] == 1):
                 await function.youtubetovideo(message)
             if(group[12] == 1):
-                await function.instatovideo(message)
+                #await function.instatovideo(message)
+                ...
             if(group[13] == 1):
-                await function.twittertovideo(message)
+                #await function.twittertovideo(message)
+                ...
             
     except Exception as e:
         logging.warning('Error at %s', 'division', exc_info=e)
@@ -343,7 +349,7 @@ async def start_bot():
 if __name__ == '__main__':
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(start_bot())
-    event_loop.run_until_complete(sirenAPI.startSiren())
+    #event_loop.run_until_complete(sirenAPI.startSiren())
     event_loop.run_forever()
 
     

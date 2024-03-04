@@ -143,6 +143,34 @@ class Function:
 
         return 'Light' if time_h in range(8, 22) else 'Dark'
 
+    def downloadbyURL(self, url: str):
+        #import requests
+        from cv2 import VideoCapture, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
+        import string, random
+        file_name = 'video/' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))+'.mp4'
+        try:
+            from requests import Session
+            with Session().get(url, stream=True, timeout = 20, headers = {
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/86.0.4240.111 Safari/537.36'
+            }) as response:
+                if response.status_code == 200:
+                    with open(file_name, "wb") as file:
+                        file.write(response.content)
+                else:
+                    return None, 0, 0
+        except:
+            return None, 0, 0
+        try:
+            vid = VideoCapture( file_name )
+            height = vid.get(CAP_PROP_FRAME_HEIGHT)
+            width = vid.get(CAP_PROP_FRAME_WIDTH)
+        except:
+            return None, 0, 0 
+
+        return file_name, str(int(width)), str(int(height))
+
     #checking and sending tiktok-video
     async def tiktoktovideo(self, message):
         url=self.searchurl(message.text)
@@ -162,25 +190,29 @@ class Function:
                         photoid= 'error'+theme
                     )
                 else:
-                    await self.botAPI.editVideo(
+                    name, w, h = self.downloadbyURL(video_data["link"])
+                    if name == None:
+                        raise aiogram.utils.exceptions.InvalidHTTPUrlContent()
+                    await self.botAPI.editVideoFile(
                     message= msg,
-                    videoId = video_data["link"], 
+                    destVideo= name,
+                    w=w,
+                    h=h,
                     text= video_data["name"])
+                    os.remove(name)
             except aiogram.utils.exceptions.InvalidHTTPUrlContent as e:
                 await self.updatePhotoFromSeesion(
                         message = msg,
                         photoid= 'error'+self.timeTheme(),
-                        caption="Відео завелике, або інші проблеми:("
+                        caption= localisation['ua']['error_video']
                     )
                 logging.warning('Error: Problems with video: '+url)
-                ...
             except Exception as e:
                 await self.updatePhotoFromSeesion(
                         message = msg,
                         photoid= 'error'+self.timeTheme()
                     )
                 logging.warning('Error at %s', 'division', exc_info=e)
-            
 
 
     #checking and sending youtube-video
@@ -194,14 +226,21 @@ class Function:
                     messageId = message.message_id
                 )
             await self.botAPI.sendReaction(message.chat.id, 'upload_video')
-            idVideo, titleVideo = self.youtubeapiID(url)
+            idVideo, titleVideo, w, h = self.youtubeapiID(url)
             video = self.database.photo(f'youtube_{idVideo}')
             if(not video is None):
                 await self.botAPI.editVideo(msg, video[0], titleVideo, lang=group[5])
             else:
                 try:
                     file = self.youtubeapi(url)
-                    msg = await self.botAPI.editVideoFile(message = msg, destVideo = 'video/'+file, text=titleVideo, lang=group[5])
+                    if file is None:
+                        await self.updatePhotoFromSeesion(
+                        message = msg,
+                        photoid= 'error'+self.timeTheme(),
+                        caption=localisation['ua']['error_video']
+                        )
+                        return
+                    msg = await self.botAPI.editVideoFile(message = msg, destVideo = 'video/'+file, w=w, h=h, text=titleVideo, lang=group[5])
                     self.database.newPhoto(msg.video.file_id, 'youtube_'+idVideo)
                 except Exception as e:
                     await self.updatePhotoFromSeesion(
@@ -209,15 +248,17 @@ class Function:
                         photoid= 'error'+self.timeTheme()
                     )
                     logging.warning('Error at %s', 'division', exc_info=e)
+                    return
                 os.remove('video/'+file)
 
     def format_selector(self, ctx):
         formats = ctx.get('formats')[::-1]
         best_video = next(f for f in formats
-                        if f['vcodec'] != 'none' and f['acodec'] == 'none' and (f['quality'] in range(7,9)) and f['ext'] != 'webm')
+                                    if f['vcodec'] != 'vp09.00.30.08' and f['acodec'] == 'none' and f['ext']!= 'webm')
         audio_ext = {'mp4': 'm4a'}[best_video['ext']]
         best_audio = next(f for f in formats if (
-            f['acodec'] != 'none' and f['vcodec'] == 'none' and f['ext'] == audio_ext))
+                      f['acodec'] != 'none' and f['vcodec'] == 'none' and f['ext'] == audio_ext))
+        
         yield {
             'format_id': f'{best_video["format_id"]}+{best_audio["format_id"]}',
             'ext': best_video['ext'],
@@ -225,12 +266,13 @@ class Function:
             'protocol': f'{best_video["protocol"]}+{best_audio["protocol"]}'
         }
 
+
     def youtubeapiID(self, url):
         from yt_dlp import YoutubeDL
         ydl_opts = {'logger':loggerYT()}
         ydl = YoutubeDL(ydl_opts)
         info = ydl.extract_info(url, download=False)
-        return info['id'], info['title']
+        return info['id'], info['title'], info['width'], info['height']
 
     #url video
     def youtubeapi(self, url):
@@ -242,7 +284,11 @@ class Function:
         }
 
         ydl = YoutubeDL(ydl_opts)
-        info = ydl.extract_info(url, download=True)
+        try:
+            info = ydl.extract_info(url, download=True)
+        except:
+            logging.warning("Problems with video: "+url)
+            return None
         inf = list(self.format_selector(info))[0]
         return info['id'] + '.' + inf['ext']
 

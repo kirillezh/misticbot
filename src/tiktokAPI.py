@@ -38,6 +38,7 @@ class SnaptikAsync(AsyncClient):
                     findall(
                         'name="(token)" value="(.*?)"',
                         (await self.get('https://snaptik.app/en')).text))},
+                        timeout=10
         )
         if 'error_api_web;' in resp.text or 'Error:' in resp.text:
             raise InvalidUrl()
@@ -54,7 +55,7 @@ class SnaptikAsync(AsyncClient):
         except:
             name = ''
         
-        link = findall(r'<a href=\\"(https?://[\w\./\-&?=]+)\\" class=\\"button download-file mt-3\\" ', dec)
+        link = findall(r'<a href=\\"(https?://[\w\./\-&?=]+)\\" class=\\"button download-file\\" ', dec)
         if(len(link) == 0):
             token =  findall(r'<button class=\\"button btn-render\\" data-token=\\"(.*?)\\" data-ad=\\"true\\" data-event=\\"click_render\\" rel=\\"nofollow\\">', dec)[0]
             resp2 = await self.get(
@@ -62,13 +63,15 @@ class SnaptikAsync(AsyncClient):
             params={
                 'token': token,
                 },
+                timeout=10
             )
             if 'error_api_web;' in resp2.text or 'Error:' in resp2.text:
                 raise InvalidUrl()
 
             linkv = findall(r'\",\"task_url\":\"(.*?)\",\"status\"', resp2.text)[0]
             resp3 = await self.get(linkv)
-            link = findall(r'\"download_url\":\"(.*?)\"}', resp3.text)
+            link = findall(r'\"download_url\":\"(.*?)\?', resp3.text)
+            link[0] += "?filename="+findall(r'data/(.*?)\.mp4', link[0])[0]+'.mp4'
         
         try:
             return {
