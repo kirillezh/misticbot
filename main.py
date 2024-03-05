@@ -349,7 +349,7 @@ async def start_bot():
 if __name__ == '__main__':
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(start_bot())
-    #event_loop.run_until_complete(sirenAPI.startSiren())
+    event_loop.run_until_complete(sirenAPI.startSiren())
     event_loop.run_forever()
 
     
