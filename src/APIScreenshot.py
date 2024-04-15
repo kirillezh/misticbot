@@ -52,7 +52,8 @@ class APIScreenshot:
         )
         await page.goto(URL)
         await page.evaluate("document.querySelector('html').className = '"+ ('black-preset' if self.mode else 'black-preset light') +" menu-hidden'")
-        await asyncio.sleep(3)
+        await page.waitForSelector(".occupied-regions")
+        await asyncio.sleep(1)
         await page.screenshot({'path': srcName})
         await page.close()
         return srcName
