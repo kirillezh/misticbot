@@ -10,7 +10,9 @@ class APIScreenshot:
     async def start(self):
         from pyppeteer import launch
         import logging
-        self.browser = await launch(defaultViewport={
+        self.browser = await launch(
+            executablePath='/usr/bin/chromium',
+            defaultViewport={
                 "width": 1600,
                 "height": 1200,
                 "isMobile": False,

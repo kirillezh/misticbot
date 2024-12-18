@@ -1,46 +1,37 @@
-FROM python:3.9-slim
+# Use a compatible base image
+FROM python:3.9-bullseye
 
-RUN apt-get update 
-RUN apt-get -y install wget curl gnupg gnupg2 gnupg1
+# Install required tools and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    gnupg \
+    ca-certificates \
+    unzip \
+    ffmpeg \
+    chromium \
+    chromium-driver && \
+    rm -rf /var/lib/apt/lists/*
 
-# Adding trusting keys to apt for repositories
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+# Set Chromium as the default browser
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROME_DRIVER=/usr/bin/chromedriver
 
-# Adding Google Chrome to the repositories
-RUN sh -c "echo 'deb http://dl.google.com/linux/chrome/deb/ stable main' >>   /etc/apt/sources.list"
+# Install Python dependencies
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Updating apt to see and install Google Chrome
-RUN apt-get -y update
-
-RUN apt-get install -y google-chrome-stable
-
-RUN apt-get install -yqq unzip
-
-# Download the Chrome Driver
-RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`\
-curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
-
-# Unzip the Chrome Driver into /usr/local/bin directory
-RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
-
-#install ffmpeg
-RUN apt-get install -y ffmpeg
-
-#install python dependencies
-COPY requirements.txt requirements.txt 
-RUN pip install --upgrade pip
-RUN pip install -r ./requirements.txt 
-
-# set display port to avoid crash
+# Set environment variables
 ENV DISPLAY=:99
-ENV APP_HOME /app 
+ENV APP_HOME /app
 
-#set workspace
+# Set working directory
 WORKDIR ${APP_HOME}
 
-#copy local files
-COPY . . 
+# Copy application files
+COPY . .
 
+# Set entry point and command
 ENTRYPOINT ["python3"]
-
 CMD ["main.py"]
